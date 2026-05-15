@@ -9,7 +9,7 @@ export function PortalProvider({ children }) {
   });
 
   const loginPortal = useCallback(async (email, password) => {
-    const { data } = await portalApi.post('/portal/login', { email, password });
+    const { data } = await portalApi.post('/auth/portal/login', { email, password });
     localStorage.setItem('portalToken', data.token);
     localStorage.setItem('portalUser', JSON.stringify(data.usuario));
     setPortalUser(data.usuario);

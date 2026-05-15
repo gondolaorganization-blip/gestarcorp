@@ -2,7 +2,7 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import {
   LayoutDashboard, Building2, Bell, MessageSquare,
-  BarChart3, LogOut, Menu, X, CreditCard, Users
+  BarChart3, LogOut, Menu, X, CreditCard, Users, UserCog
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -14,6 +14,7 @@ const NAV = [
   { to: '/suscripciones',   label: 'Suscripciones',   icon: CreditCard },
   { to: '/reportes',        label: 'Reportes',        icon: BarChart3 },
   { to: '/portal-usuarios', label: 'Portal clientes', icon: Users },
+  { to: '/agentes',         label: 'Agentes',         icon: UserCog },
 ];
 
 export default function Layout() {

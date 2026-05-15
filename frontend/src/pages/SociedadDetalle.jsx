@@ -550,6 +550,8 @@ function TabObligaciones({ id }) {
   const [form, setForm] = useState({});
   const [anioGenerar, setAnioGenerar] = useState(new Date().getFullYear());
   const [generando, setGenerando] = useState(false);
+  const [showNueva, setShowNueva] = useState(false);
+  const [nuevaForm, setNuevaForm] = useState({});
   const TIPOS = ['TASA_UNICA','IMPUESTO_RENTA','AVISO_OPERACION','CAJA_SEGURO_SOCIAL','LICENCIA_COMERCIAL','OTRO'];
   const ESTADOS = ['PENDIENTE','PAGADO','VENCIDO','EXENTO'];
 
@@ -569,6 +571,13 @@ function TabObligaciones({ id }) {
     } catch(e) { toast.error(e?.response?.data?.error || 'Error'); }
   }
 
+  async function handleCrearObligacion() {
+    try {
+      await api.post(`/sociedades/${id}/obligaciones`, nuevaForm);
+      toast.success('Obligación creada'); setShowNueva(false); cargar();
+    } catch(e) { toast.error(e?.response?.data?.error || 'Error al crear'); }
+  }
+
   async function handleGenerar() {
     setGenerando(true);
     try {
@@ -582,7 +591,7 @@ function TabObligaciones({ id }) {
   if (loading) return <PageSpinner />;
   return (
     <div>
-      <div className="flex items-center justify-end gap-3 mb-4">
+      <div className="flex items-center justify-end gap-3 mb-4 flex-wrap">
         <div className="flex items-center gap-2">
           <label className="text-xs text-gray-500 font-medium">Año:</label>
           <input type="number" className="input w-24 text-sm py-1.5"
@@ -590,10 +599,14 @@ function TabObligaciones({ id }) {
         </div>
         <button className="btn-secondary btn-sm" onClick={handleGenerar} disabled={generando}>
           {generando ? <Spinner size="sm"/> : <Plus size={14}/>}
-          Generar obligaciones del año
+          Generar año
+        </button>
+        <button className="btn-primary btn-sm"
+          onClick={() => { setNuevaForm({ tipo:'TASA_UNICA', anio:new Date().getFullYear(), entidad:'', fechaVence:'', estado:'PENDIENTE', monto:0 }); setShowNueva(true); }}>
+          <Plus size={14}/> Agregar manual
         </button>
       </div>
-      {items.length === 0 ? <EmptyState message="Sin obligaciones registradas. Usa 'Generar obligaciones del año' para crearlas automáticamente." /> : (
+      {items.length === 0 ? <EmptyState message="Sin obligaciones. Usa 'Generar año' para crearlas automáticamente." /> : (
         <table className="w-full"><thead className="bg-gray-50 border-b"><tr>
           <th className="th">Tipo</th><th className="th">Año</th><th className="th">Entidad</th>
           <th className="th">Vence</th><th className="th">Estado</th><th className="th">Monto</th><th className="th"/>
@@ -638,6 +651,40 @@ function TabObligaciones({ id }) {
           <div className="flex justify-end gap-3 pt-2">
             <button className="btn-secondary" onClick={()=>setShowModal(false)}>Cancelar</button>
             <button className="btn-primary" onClick={handleSave}>Guardar</button>
+          </div>
+        </div>
+      </Modal>
+      <Modal open={showNueva} onClose={()=>setShowNueva(false)} title="Nueva obligación">
+        <div className="space-y-3">
+          <div className="grid grid-cols-2 gap-3">
+            <div><label className="label">Tipo</label>
+              <select className="input" value={nuevaForm.tipo||'TASA_UNICA'} onChange={e=>setNuevaForm(f=>({...f,tipo:e.target.value}))}>
+                {TIPOS.map(t=><option key={t} value={t}>{t.replace(/_/g,' ')}</option>)}
+              </select>
+            </div>
+            <div><label className="label">Año</label>
+              <input type="number" className="input" value={nuevaForm.anio||new Date().getFullYear()} onChange={e=>setNuevaForm(f=>({...f,anio:Number(e.target.value)}))}/>
+            </div>
+          </div>
+          <div><label className="label">Entidad</label>
+            <input className="input" value={nuevaForm.entidad||''} onChange={e=>setNuevaForm(f=>({...f,entidad:e.target.value}))}/>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div><label className="label">Fecha vence *</label>
+              <input type="date" className="input" value={nuevaForm.fechaVence||''} onChange={e=>setNuevaForm(f=>({...f,fechaVence:e.target.value}))}/>
+            </div>
+            <div><label className="label">Monto (USD)</label>
+              <input type="number" className="input" value={nuevaForm.monto||0} onChange={e=>setNuevaForm(f=>({...f,monto:Number(e.target.value)}))}/>
+            </div>
+          </div>
+          <div><label className="label">Estado</label>
+            <select className="input" value={nuevaForm.estado||'PENDIENTE'} onChange={e=>setNuevaForm(f=>({...f,estado:e.target.value}))}>
+              {ESTADOS.map(s=><option key={s}>{s}</option>)}
+            </select>
+          </div>
+          <div className="flex justify-end gap-3 pt-2">
+            <button className="btn-secondary" onClick={()=>setShowNueva(false)}>Cancelar</button>
+            <button className="btn-primary" onClick={handleCrearObligacion}>Crear obligación</button>
           </div>
         </div>
       </Modal>

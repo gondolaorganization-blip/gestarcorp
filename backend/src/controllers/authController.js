@@ -296,3 +296,60 @@ export async function actualizarAccesoPortal(req, res) {
 
   res.json(acceso);
 }
+
+// ─── GESTIÓN DE AGENTES (SUPERADMIN) ─────────────────────────────────────────
+
+export async function listarAgentes(req, res) {
+  const agentes = await prisma.usuario.findMany({
+    orderBy: { creadoEn: 'desc' },
+    select: { id: true, email: true, nombre: true, rol: true, activo: true, creadoEn: true },
+  });
+  res.json(agentes);
+}
+
+export async function crearAgente(req, res) {
+  const { email, password, nombre, rol } = req.body;
+  if (!email || !password || !nombre) {
+    return res.status(400).json({ error: 'email, password y nombre son requeridos.' });
+  }
+  const errorPass = validarPassword(password);
+  if (errorPass) return res.status(400).json({ error: errorPass });
+
+  const existe = await prisma.usuario.findUnique({ where: { email: email.toLowerCase().trim() } });
+  if (existe) return res.status(409).json({ error: 'Ya existe un usuario con ese email.' });
+
+  const passwordHash = await hashPassword(password);
+  const agente = await prisma.usuario.create({
+    data: { email: email.toLowerCase().trim(), passwordHash, nombre, rol: rol || 'AGENTE' },
+    select: { id: true, email: true, nombre: true, rol: true, activo: true, creadoEn: true },
+  });
+  res.status(201).json(agente);
+}
+
+export async function actualizarAgente(req, res) {
+  const { nombre, email, password, activo, rol } = req.body;
+  const agente = await prisma.usuario.findUnique({ where: { id: req.params.uid } });
+  if (!agente) return res.status(404).json({ error: 'Usuario no encontrado.' });
+
+  const data = {};
+  if (nombre) data.nombre = nombre;
+  if (email) {
+    const dup = await prisma.usuario.findFirst({ where: { email: email.toLowerCase().trim(), NOT: { id: req.params.uid } } });
+    if (dup) return res.status(409).json({ error: 'Email ya en uso por otro usuario.' });
+    data.email = email.toLowerCase().trim();
+  }
+  if (activo !== undefined) data.activo = activo;
+  if (rol) data.rol = rol;
+  if (password) {
+    const errorPass = validarPassword(password);
+    if (errorPass) return res.status(400).json({ error: errorPass });
+    data.passwordHash = await hashPassword(password);
+  }
+
+  const updated = await prisma.usuario.update({
+    where: { id: req.params.uid },
+    data,
+    select: { id: true, email: true, nombre: true, rol: true, activo: true, creadoEn: true },
+  });
+  res.json(updated);
+}

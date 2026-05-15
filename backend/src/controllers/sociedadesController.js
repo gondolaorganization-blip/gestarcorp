@@ -415,6 +415,25 @@ export async function generarObligacionesAnio(req, res) {
   res.status(201).json({ creadas: creadas.count, obligaciones });
 }
 
+export async function crearObligacion(req, res) {
+  const d = req.body;
+  if (!d.tipo || !d.anio || !d.fechaVence) {
+    return res.status(400).json({ error: 'tipo, anio y fechaVence son requeridos.' });
+  }
+  const obligacion = await prisma.obligacionFiscal.create({
+    data: {
+      sociedadId: req.params.id,
+      tipo:       d.tipo,
+      anio:       Number(d.anio),
+      entidad:    d.entidad || null,
+      fechaVence: new Date(d.fechaVence),
+      estado:     d.estado || 'PENDIENTE',
+      monto:      d.monto ? Number(d.monto) : null,
+    }
+  });
+  res.status(201).json(obligacion);
+}
+
 export async function actualizarObligacion(req, res) {
   const d = req.body;
   const obligacion = await prisma.obligacionFiscal.update({

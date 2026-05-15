@@ -15,6 +15,7 @@ import Reportes          from './pages/Reportes.jsx';
 import Suscripciones     from './pages/Suscripciones.jsx';
 import UsuariosPortal    from './pages/UsuariosPortal.jsx';
 
+import Agentes           from './pages/Agentes.jsx';
 import PortalLogin       from './pages/portal/PortalLogin.jsx';
 import PortalObligaciones from './pages/portal/PortalObligaciones.jsx';
 import PortalConsultas   from './pages/portal/PortalConsultas.jsx';
@@ -63,6 +64,7 @@ export default function App() {
               <Route path="reportes"           element={<Reportes />} />
               <Route path="suscripciones"      element={<Suscripciones />} />
               <Route path="portal-usuarios"    element={<UsuariosPortal />} />
+              <Route path="agentes"            element={<Agentes />} />
             </Route>
 
             {/* Fallback */}

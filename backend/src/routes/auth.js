@@ -5,6 +5,7 @@ import {
   loginPortal, mePortal, cambiarPasswordPortal,
   solicitarResetPortal, resetPasswordPortal,
   obtenerAccesoPortal, crearAccesoPortal, actualizarAccesoPortal,
+  listarAgentes, crearAgente, actualizarAgente,
 } from '../controllers/authController.js';
 import { requireAuth, requireAgente, requirePortal } from '../middleware/auth.js';
 
@@ -37,3 +38,8 @@ authRouter.post('/portal/reset-password', resetPasswordPortal);
 authRouter.get('/portal/sociedad/:id', requireAuth, requireAgente, obtenerAccesoPortal);
 authRouter.post('/portal/sociedad/:id', requireAuth, requireAgente, crearAccesoPortal);
 authRouter.put('/portal/sociedad/:id', requireAuth, requireAgente, actualizarAccesoPortal);
+
+// ─── GESTIÓN DE AGENTES (cualquier agente autenticado) ────────────────────────
+authRouter.get('/agentes',         requireAuth, requireAgente, listarAgentes);
+authRouter.post('/agentes',        requireAuth, requireAgente, crearAgente);
+authRouter.put('/agentes/:uid',    requireAuth, requireAgente, actualizarAgente);

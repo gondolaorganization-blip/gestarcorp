@@ -3,7 +3,7 @@ import {
   listarSociedades, obtenerSociedad, crearSociedad,
   actualizarSociedad, eliminarSociedad, resumenSociedad,
   listarDirectores, crearDirector, actualizarDirector, eliminarDirector,
-  listarObligaciones, generarObligacionesAnio, actualizarObligacion,
+  listarObligaciones, crearObligacion, generarObligacionesAnio, actualizarObligacion,
 } from '../controllers/sociedadesController.js';
 import { accionesRouter }       from './acciones.js';
 import { accionistasRouter }    from './accionistas.js';
@@ -33,6 +33,7 @@ sociedadesRouter.delete('/:id/directores/:dirId',   eliminarDirector);
 
 // Obligaciones fiscales
 sociedadesRouter.get('/:id/obligaciones',           listarObligaciones);
+sociedadesRouter.post('/:id/obligaciones',          crearObligacion);
 sociedadesRouter.post('/:id/obligaciones/generar',  generarObligacionesAnio);
 sociedadesRouter.put('/:id/obligaciones/:obId',     actualizarObligacion);
 
