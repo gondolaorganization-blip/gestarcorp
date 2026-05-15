@@ -1,0 +1,27 @@
+# Dependencias
+node_modules/
+
+# Entorno — NUNCA commitear
+.env
+.env.local
+.env.*.local
+
+# Build
+dist/
+build/
+.vite/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Uploads (archivos generados en runtime)
+backend/uploads/
+
+# IDE
+.vscode/
+.idea/

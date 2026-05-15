@@ -1,0 +1,590 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── USUARIOS DEL SISTEMA ────────────────────────────────────────────────────
+
+model Usuario {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  nombre       String
+  rol          RolUsuario @default(AGENTE)
+  activo       Boolean  @default(true)
+  creadoEn     DateTime @default(now())
+  actualizadoEn DateTime @updatedAt
+
+  consultas    Consulta[]
+  sociedades   Sociedad[]  @relation("AgenteResidente")
+
+  @@map("usuarios")
+}
+
+enum RolUsuario {
+  SUPERADMIN
+  AGENTE
+}
+
+// ─── SOCIEDAD ANÓNIMA ─────────────────────────────────────────────────────────
+
+model Sociedad {
+  id                 String        @id @default(uuid())
+  nombre             String
+  ficha              String?
+  tomo               String?
+  folio              String?
+  fechaConstitucion  DateTime?
+  duracion           String?       @default("Perpetua")
+  domicilio          String?
+  capital            Decimal?      @db.Decimal(15, 2)
+  tipoAcciones       TipoAcciones? @default(NOMINATIVAS)
+  cantidadAcciones   Int?
+  valorNominal       Decimal?      @db.Decimal(15, 2)
+  estado             EstadoSociedad @default(ACTIVA)
+  planCliente        PlanCliente   @default(MENSUAL)
+  fechaVencimiento   DateTime?
+  notas              String?
+  creadoEn           DateTime      @default(now())
+  actualizadoEn      DateTime      @updatedAt
+
+  agenteId           String?
+  agente             Usuario?      @relation("AgenteResidente", fields: [agenteId], references: [id])
+
+  accionistas        Accionista[]
+  directores         Director[]
+  acciones           Accion[]
+  actas              Acta[]
+  beneficiarios      BeneficiarioFinal[]
+  pactosSociales     PactoSocial[]
+  poderes            Poder[]
+  documentos         DocumentoSocietario[]
+  obligacionesFiscales ObligacionFiscal[]
+  consultas          Consulta[]
+  portalAcceso       PortalAcceso?
+  suscripciones      Suscripcion[]
+
+  @@map("sociedades")
+}
+
+enum EstadoSociedad {
+  ACTIVA
+  INACTIVA
+  DISUELTA
+}
+
+enum PlanCliente {
+  MENSUAL
+  ANUAL
+  FUNDADOR
+}
+
+enum TipoAcciones {
+  NOMINATIVAS
+  AL_PORTADOR
+  MIXTAS
+}
+
+// ─── ACCIONISTAS ─────────────────────────────────────────────────────────────
+
+model Accionista {
+  id               String        @id @default(uuid())
+  sociedadId       String
+  sociedad         Sociedad      @relation(fields: [sociedadId], references: [id], onDelete: Cascade)
+
+  nombre           String
+  tipoDocumento    TipoDocumento
+  numeroDocumento  String
+  nacionalidad     String?
+  email            String?
+  telefono         String?
+  domicilio        String?
+  cantidadAcciones Int           @default(0)
+  porcentaje       Decimal?      @db.Decimal(5, 2)
+  fechaIngreso     DateTime?
+  activo           Boolean       @default(true)
+  notas            String?
+  creadoEn         DateTime      @default(now())
+  actualizadoEn    DateTime      @updatedAt
+
+  historial        HistorialAccionista[]
+
+  @@map("accionistas")
+}
+
+// Registro de cada cambio en la participación accionaria
+model HistorialAccionista {
+  id                       String             @id @default(uuid())
+  accionistaId             String
+  accionista               Accionista         @relation(fields: [accionistaId], references: [id], onDelete: Cascade)
+  sociedadId               String
+
+  tipoMovimiento           TipoMovimientoAccionista
+  cantidadAccionesAnterior Int
+  cantidadAccionesNueva    Int
+  porcentajeAnterior       Decimal?           @db.Decimal(5, 2)
+  porcentajeNueva          Decimal?           @db.Decimal(5, 2)
+  fecha                    DateTime           @default(now())
+  motivo                   String?
+  registradoPor            String?
+  creadoEn                 DateTime           @default(now())
+
+  @@map("historial_accionistas")
+}
+
+enum TipoMovimientoAccionista {
+  INGRESO
+  AUMENTO
+  REDUCCION
+  SALIDA
+  CORRECCION
+}
+
+// ─── DIRECTORES / DIGNATARIOS ────────────────────────────────────────────────
+
+model Director {
+  id               String       @id @default(uuid())
+  sociedadId       String
+  sociedad         Sociedad     @relation(fields: [sociedadId], references: [id], onDelete: Cascade)
+
+  nombre           String
+  tipoDocumento    TipoDocumento
+  numeroDocumento  String
+  nacionalidad     String?
+  email            String?
+  telefono         String?
+  domicilio        String?
+  cargo            CargoDirector
+  fechaNombramiento DateTime?
+  fechaVencimiento  DateTime?
+  activo           Boolean      @default(true)
+  notas            String?
+  creadoEn         DateTime     @default(now())
+  actualizadoEn    DateTime     @updatedAt
+
+  @@map("directores")
+}
+
+enum CargoDirector {
+  PRESIDENTE
+  SECRETARIO
+  TESORERO
+  DIRECTOR
+  DIRECTOR_SUPLENTE
+  AGENTE_RESIDENTE
+}
+
+// ─── ACCIONES ─────────────────────────────────────────────────────────────────
+
+model Accion {
+  id                  String        @id @default(uuid())
+  sociedadId          String
+  sociedad            Sociedad      @relation(fields: [sociedadId], references: [id], onDelete: Cascade)
+
+  numero              String
+  clase               ClaseAccion   @default(COMUN)
+  titular             String
+  titularDocumento    String?
+  fechaEmision        DateTime?
+  valorNominal        Decimal?      @db.Decimal(15, 2)
+  estado              EstadoAccion  @default(VIGENTE)
+  certificadoGenerado Boolean       @default(false)
+  notas               String?
+  creadoEn            DateTime      @default(now())
+  actualizadoEn       DateTime      @updatedAt
+
+  transferencias      TransferenciaAccion[]
+
+  @@unique([sociedadId, numero])
+  @@map("acciones")
+}
+
+enum ClaseAccion {
+  COMUN
+  PREFERIDA
+  SERIE_A
+  SERIE_B
+  OTRO
+}
+
+enum EstadoAccion {
+  VIGENTE
+  TRANSFERIDA
+  CANCELADA
+  PIGNORADA
+}
+
+model TransferenciaAccion {
+  id          String   @id @default(uuid())
+  accionId    String
+  accion      Accion   @relation(fields: [accionId], references: [id], onDelete: Cascade)
+
+  cedente     String
+  cesionario  String
+  cantidad    Int
+  fecha       DateTime
+  precio      Decimal? @db.Decimal(15, 2)
+  actaId      String?
+  registrado  Boolean  @default(false)
+  notas       String?
+  creadoEn    DateTime @default(now())
+
+  @@map("transferencias_acciones")
+}
+
+// ─── ACTAS ────────────────────────────────────────────────────────────────────
+
+model Acta {
+  id          String      @id @default(uuid())
+  sociedadId  String
+  sociedad    Sociedad    @relation(fields: [sociedadId], references: [id], onDelete: Cascade)
+
+  numero      Int
+  tipo        TipoActa
+  fecha       DateTime
+  lugar       String?
+  quorum      String?
+  agenda      String?
+  acuerdos    String?
+  estado      EstadoActa  @default(BORRADOR)
+  documento   String?
+  notas       String?
+  creadoEn    DateTime    @default(now())
+  actualizadoEn DateTime  @updatedAt
+
+  @@unique([sociedadId, numero])
+  @@map("actas")
+}
+
+enum TipoActa {
+  ASAMBLEA_ORDINARIA
+  ASAMBLEA_EXTRAORDINARIA
+  JUNTA_DIRECTIVA
+  RESOLUCION
+  NOMBRAMIENTO_DIGNATARIOS
+  APROBACION_ESTADOS_FINANCIEROS
+  DISTRIBUCION_DIVIDENDOS
+  AUMENTO_CAPITAL
+  CAMBIO_DOMICILIO
+  DISOLUCION_LIQUIDACION
+  OTRO
+}
+
+enum EstadoActa {
+  BORRADOR
+  FIRMADA
+  PROTOCOLIZADA
+}
+
+// ─── BENEFICIARIOS FINALES (Ley 52 de 2016) ──────────────────────────────────
+
+model BeneficiarioFinal {
+  id                  String        @id @default(uuid())
+  sociedadId          String
+  sociedad            Sociedad      @relation(fields: [sociedadId], references: [id], onDelete: Cascade)
+
+  nombre              String
+  tipoDocumento       TipoDocumento
+  numeroDocumento     String
+  nacionalidad        String?
+  fechaNacimiento     DateTime?
+  domicilio           String?
+  porcentajeControl   Decimal?      @db.Decimal(5, 2)
+  tipoControl         TipoControl   @default(DIRECTO)
+  esPEP               Boolean       @default(false)
+  cargoPublico        String?
+  fechaDeclaracion    DateTime?
+  fechaActualizacion  DateTime?
+  documentoIdentidad  String?
+  verificado          Boolean       @default(false)
+  notas               String?
+  creadoEn            DateTime      @default(now())
+  actualizadoEn       DateTime      @updatedAt
+
+  @@map("beneficiarios_finales")
+}
+
+enum TipoControl {
+  DIRECTO
+  INDIRECTO
+  DIRECTO_E_INDIRECTO
+}
+
+// ─── PACTO SOCIAL ─────────────────────────────────────────────────────────────
+
+model PactoSocial {
+  id                    String          @id @default(uuid())
+  sociedadId            String
+  sociedad              Sociedad        @relation(fields: [sociedadId], references: [id], onDelete: Cascade)
+
+  version               Int             @default(1)
+  estado                EstadoDocumento @default(BORRADOR)
+  contenido             String?
+  fechaGenerado         DateTime?
+  notaria               String?
+  tomo                  String?
+  folio                 String?
+  fechaProtocolizacion  DateTime?
+  notas                 String?
+  creadoEn              DateTime        @default(now())
+  actualizadoEn         DateTime        @updatedAt
+
+  @@map("pactos_sociales")
+}
+
+// ─── PODERES ──────────────────────────────────────────────────────────────────
+
+model Poder {
+  id               String         @id @default(uuid())
+  sociedadId       String
+  sociedad         Sociedad       @relation(fields: [sociedadId], references: [id], onDelete: Cascade)
+
+  tipo             TipoPoder
+  poderdante       String
+  apoderado        String
+  facultades       String?
+  fechaOtorgamiento DateTime?
+  fechaVencimiento  DateTime?
+  notaria          String?
+  tomo             String?
+  folio            String?
+  activo           Boolean        @default(true)
+  notas            String?
+  creadoEn         DateTime       @default(now())
+  actualizadoEn    DateTime       @updatedAt
+
+  @@map("poderes")
+}
+
+enum TipoPoder {
+  GENERAL
+  ESPECIAL
+  JUDICIAL
+  ADMINISTRATIVO
+}
+
+// ─── DOCUMENTOS SOCIETARIOS ───────────────────────────────────────────────────
+
+model DocumentoSocietario {
+  id              String          @id @default(uuid())
+  sociedadId      String
+  sociedad        Sociedad        @relation(fields: [sociedadId], references: [id], onDelete: Cascade)
+
+  tipo            TipoDocumento2
+  nombre          String
+  archivo         String?
+  fechaGenerado   DateTime?
+  fechaVencimiento DateTime?
+  estado          EstadoDocumento @default(BORRADOR)
+  notas           String?
+  creadoEn        DateTime        @default(now())
+  actualizadoEn   DateTime        @updatedAt
+
+  @@map("documentos_societarios")
+}
+
+enum TipoDocumento2 {
+  PACTO_SOCIAL
+  PODER_GENERAL
+  PODER_ESPECIAL
+  RESOLUCION_APERTURA_CUENTA
+  CERTIFICADO_INCUMBENCIA
+  CERTIFICADO_BUENA_STANDING
+  CERTIFICADO_ACCIONES
+  DECLARACION_JURADA_DIRECTOR
+  CARTA_RENUNCIA_DIRECTOR
+  ACEPTACION_CARGO_DIRECTOR
+  OTRO
+}
+
+enum EstadoDocumento {
+  BORRADOR
+  FINAL
+  PROTOCOLIZADO
+}
+
+// ─── OBLIGACIONES FISCALES Y CORPORATIVAS ────────────────────────────────────
+// Cubre: Aviso de Operación (MICI), Tasa Única (Reg. Público),
+//        Declaración de Renta (DGI), Declaración Municipal
+
+model ObligacionFiscal {
+  id           String           @id @default(uuid())
+  sociedadId   String
+  sociedad     Sociedad         @relation(fields: [sociedadId], references: [id], onDelete: Cascade)
+
+  tipo         TipoObligacion
+  anio         Int
+  entidad      String?
+  descripcion  String?
+  monto        Decimal?         @db.Decimal(10, 2)
+  fechaVence   DateTime
+  estado       EstadoObligacion @default(PENDIENTE)
+  fechaPago    DateTime?
+  comprobante  String?
+  notas        String?
+  creadoEn     DateTime         @default(now())
+  actualizadoEn DateTime        @updatedAt
+
+  @@unique([sociedadId, tipo, anio])
+  @@map("obligaciones_fiscales")
+}
+
+enum TipoObligacion {
+  AVISO_OPERACION      // MICI — vence 31 de marzo
+  TASA_UNICA           // Registro Público — vence según mes de constitución
+  DECLARACION_RENTA    // DGI — vence 31 de marzo
+  DECLARACION_MUNICIPAL // Municipio — vence según municipio
+  OTRO
+}
+
+enum EstadoObligacion {
+  PENDIENTE
+  PAGADO
+  VENCIDO
+  EXENTO
+  NO_APLICA
+}
+
+// ─── CONSULTAS AGENTE-CLIENTE ─────────────────────────────────────────────────
+
+model Consulta {
+  id              String          @id @default(uuid())
+  sociedadId      String
+  sociedad        Sociedad        @relation(fields: [sociedadId], references: [id], onDelete: Cascade)
+
+  usuarioId       String?
+  usuario         Usuario?        @relation(fields: [usuarioId], references: [id])
+
+  tipo            TipoConsulta    @default(GENERAL)
+  descripcion     String
+  estado          EstadoConsulta  @default(ABIERTA)
+  respuesta       String?
+  fecha           DateTime        @default(now())
+  fechaRespuesta  DateTime?
+  notas           String?
+  creadoEn        DateTime        @default(now())
+  actualizadoEn   DateTime        @updatedAt
+
+  @@map("consultas")
+}
+
+enum TipoConsulta {
+  GENERAL
+  LEGAL
+  FISCAL
+  DOCUMENTAL
+  OTRO
+}
+
+enum EstadoConsulta {
+  ABIERTA
+  EN_PROCESO
+  RESUELTA
+  CERRADA
+}
+
+// ─── PORTAL DEL CLIENTE ────────────────────────────────────────────────────────
+
+model PortalAcceso {
+  id           String    @id @default(uuid())
+  sociedadId   String    @unique
+  sociedad     Sociedad  @relation(fields: [sociedadId], references: [id], onDelete: Cascade)
+
+  email        String    @unique
+  passwordHash String
+  ultimoAcceso DateTime?
+  activo       Boolean   @default(true)
+  tokenReset   String?
+  tokenResetVence DateTime?
+  creadoEn     DateTime  @default(now())
+  actualizadoEn DateTime @updatedAt
+
+  @@map("portal_accesos")
+}
+
+// ─── SUSCRIPCIONES Y PAGOS ───────────────────────────────────────────────────
+
+model Suscripcion {
+  id                   String            @id @default(uuid())
+  sociedadId           String
+  sociedad             Sociedad          @relation(fields: [sociedadId], references: [id], onDelete: Cascade)
+
+  plan                 PlanCliente
+  estado               EstadoSuscripcion @default(PENDIENTE)
+  metodoPago           MetodoPago?
+  monto                Decimal           @db.Decimal(10, 2)
+  moneda               String            @default("USD")
+  fechaInicio          DateTime?
+  fechaVencimiento     DateTime?
+
+  // Stripe
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  stripeSessionId      String?
+
+  // Yappy
+  yappyOrderId         String?
+
+  renovacionAutomatica Boolean           @default(false)
+  notas                String?
+  creadoEn             DateTime          @default(now())
+  actualizadoEn        DateTime          @updatedAt
+
+  pagos                Pago[]
+
+  @@map("suscripciones")
+}
+
+model Pago {
+  id            String     @id @default(uuid())
+  suscripcionId String
+  suscripcion   Suscripcion @relation(fields: [suscripcionId], references: [id], onDelete: Cascade)
+
+  monto         Decimal    @db.Decimal(10, 2)
+  moneda        String     @default("USD")
+  estado        EstadoPago @default(PENDIENTE)
+  metodoPago    MetodoPago
+  referencia    String?
+  descripcion   String?
+  fechaPago     DateTime?
+  metadatos     Json?
+  creadoEn      DateTime   @default(now())
+  actualizadoEn DateTime   @updatedAt
+
+  @@map("pagos")
+}
+
+enum EstadoSuscripcion {
+  PENDIENTE
+  ACTIVA
+  VENCIDA
+  CANCELADA
+  SUSPENDIDA
+}
+
+enum EstadoPago {
+  PENDIENTE
+  COMPLETADO
+  FALLIDO
+  REEMBOLSADO
+}
+
+enum MetodoPago {
+  STRIPE
+  YAPPY
+  TRANSFERENCIA
+  EFECTIVO
+}
+
+// ─── ENUMS COMPARTIDOS ────────────────────────────────────────────────────────
+
+enum TipoDocumento {
+  CEDULA
+  PASAPORTE
+  RUC
+  OTRO
+}
