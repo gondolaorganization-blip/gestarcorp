@@ -284,7 +284,7 @@ export function htmlActa({ sociedad, acta, directores = [], accionistas = [] }) 
   </div>
 
   <div class="pie-pagina">
-    GESTARGOV · Acta N° ${numeroFormateado} · ${sociedad.nombre} · ${formatearFecha(new Date())}
+    GESTARCORP · Acta N° ${numeroFormateado} · ${sociedad.nombre} · ${formatearFecha(new Date())}
   </div>
   </body></html>`;
 }

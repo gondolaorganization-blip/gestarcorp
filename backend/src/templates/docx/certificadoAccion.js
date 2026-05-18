@@ -93,7 +93,7 @@ export async function docxCertificadoAccion({ sociedad, accion }) {
 
     // Pie
     new Paragraph({
-      children: [italic(`GESTARGOV · Gestión Societaria Panameña · Documento generado el ${formatearFecha(new Date())}`, 18)],
+      children: [italic(`GESTARCORP · Gestión Societaria Panameña · Documento generado el ${formatearFecha(new Date())}`, 18)],
       alignment: AlignmentType.CENTER,
       border: { top: { style: BorderStyle.SINGLE, size: 6, color: '888888' } },
     }),

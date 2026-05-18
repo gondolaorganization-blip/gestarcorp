@@ -117,7 +117,7 @@ export async function docxActa({ sociedad, acta, directores = [] }) {
     new Paragraph({ text: '', spacing: { after: 300 } }),
     new Paragraph({
       children: [italic(
-        `GESTARGOV · Acta N° ${numeroFormateado} · ${sociedad.nombre} · Generado el ${formatearFecha(new Date())}`, 18
+        `GESTARCORP · Acta N° ${numeroFormateado} · ${sociedad.nombre} · Generado el ${formatearFecha(new Date())}`, 18
       )],
       alignment: AlignmentType.CENTER,
       border: { top: { style: BorderStyle.SINGLE, size: 6, color: '888888' } },

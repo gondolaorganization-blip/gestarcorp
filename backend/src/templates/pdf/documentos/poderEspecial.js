@@ -78,7 +78,7 @@ export function htmlPoderEspecial({ sociedad, directores, apoderado, propositoEs
   </div>` : ''}
 
   <div class="pie-pagina">
-    GESTARGOV · Poder Especial · ${sociedad.nombre} · ${formatearFecha(new Date())}
+    GESTARCORP · Poder Especial · ${sociedad.nombre} · ${formatearFecha(new Date())}
   </div>
   </body></html>`;
 }

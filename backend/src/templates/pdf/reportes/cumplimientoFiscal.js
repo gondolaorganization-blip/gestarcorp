@@ -80,7 +80,7 @@ export function htmlReporteCumplimiento({ obligaciones, anio, agenteNombre }) {
 
   <div class="encabezado">
     <h1>Reporte de Cumplimiento Fiscal ${anio}</h1>
-    <h2>GESTARGOV · Cartera Completa</h2>
+    <h2>GESTARCORP · Cartera Completa</h2>
     <p>Agente: ${agenteNombre || '—'} · Generado: ${formatearFecha(new Date())}</p>
   </div>
 
@@ -112,7 +112,7 @@ export function htmlReporteCumplimiento({ obligaciones, anio, agenteNombre }) {
   ${seccionesSociedad}
 
   <div class="pie-pagina">
-    GESTARGOV · Reporte de Cumplimiento Fiscal ${anio} · ${formatearFecha(new Date())}
+    GESTARCORP · Reporte de Cumplimiento Fiscal ${anio} · ${formatearFecha(new Date())}
   </div>
   </body></html>`;
 }

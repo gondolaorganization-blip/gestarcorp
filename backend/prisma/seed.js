@@ -4,16 +4,16 @@ import bcrypt from 'bcryptjs';
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('Iniciando seed de GESTARGOV...');
+  console.log('Iniciando seed de GESTARCORP...');
 
   // Usuario agente residente (administrador)
-  const passwordHash = await bcrypt.hash('gestargov2024', 10);
+  const passwordHash = await bcrypt.hash('gestarcorp2024', 10);
 
   const agente = await prisma.usuario.upsert({
-    where: { email: 'admin@gestargov.com' },
+    where: { email: 'admin@gestarcorp.com' },
     update: {},
     create: {
-      email: 'admin@gestargov.com',
+      email: 'admin@gestarcorp.com',
       passwordHash,
       nombre: 'Agente Residente',
       rol: 'AGENTE',
@@ -162,7 +162,7 @@ async function main() {
   console.log('Portal de acceso demo creado: cliente@demo.com / cliente2024');
 
   console.log('\n✓ Seed completado.');
-  console.log('  Agente: admin@gestargov.com / gestargov2024');
+  console.log('  Agente: admin@gestarcorp.com / gestarcorp2024');
   console.log('  Cliente demo: cliente@demo.com / cliente2024');
 }
 

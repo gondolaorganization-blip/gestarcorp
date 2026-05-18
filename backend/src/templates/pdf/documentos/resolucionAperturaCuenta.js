@@ -97,7 +97,7 @@ export function htmlResolucionAperturaCuenta({ sociedad, directores, banco, firm
   </div>
 
   <div class="pie-pagina">
-    GESTARGOV · Resolución Apertura de Cuenta · ${sociedad.nombre} · ${formatearFecha(new Date())}
+    GESTARCORP · Resolución Apertura de Cuenta · ${sociedad.nombre} · ${formatearFecha(new Date())}
   </div>
   </body></html>`;
 }

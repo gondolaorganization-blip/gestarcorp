@@ -87,7 +87,7 @@ export function htmlDeclaracionJuradaDirector({ sociedad, director }) {
   </div>
 
   <div class="pie-pagina">
-    GESTARGOV · Declaración Jurada de Director · ${sociedad.nombre} · ${formatearFecha(new Date())}
+    GESTARCORP · Declaración Jurada de Director · ${sociedad.nombre} · ${formatearFecha(new Date())}
   </div>
   </body></html>`;
 }

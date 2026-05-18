@@ -35,7 +35,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 
 app.get('/api/health', (_req, res) => {
-  res.json({ status: 'ok', app: 'GESTARGOV', version: '1.0.0' });
+  res.json({ status: 'ok', app: 'GESTARCORP', version: '1.0.0' });
 });
 
 app.get('/api/setup/status', async (_req, res) => {
@@ -59,7 +59,7 @@ app.get('/api/consultas/estadisticas',          requireAuth, requireAgente, esta
 app.use(errorHandler);
 
 app.listen(PORT, () => {
-  console.log(`GESTARGOV API corriendo en http://localhost:${PORT}`);
+  console.log(`GESTARCORP API corriendo en http://localhost:${PORT}`);
   iniciarCronObligaciones();
 });
 

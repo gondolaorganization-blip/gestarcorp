@@ -24,10 +24,10 @@ export async function enviarEmailResetPortal({ email, token, nombreSociedad }) {
   await transporter.sendMail({
     from: process.env.SMTP_FROM,
     to: email,
-    subject: `GESTARGOV — Restablecer contraseña de ${nombreSociedad}`,
+    subject: `GESTARCORP — Restablecer contraseña de ${nombreSociedad}`,
     html: `
       <div style="font-family:sans-serif;max-width:500px;margin:0 auto">
-        <h2 style="color:#1e40af">GESTARGOV</h2>
+        <h2 style="color:#1e40af">GESTARCORP</h2>
         <p>Hola,</p>
         <p>Recibimos una solicitud para restablecer la contraseña del portal de
            <strong>${nombreSociedad}</strong>.</p>
@@ -40,7 +40,7 @@ export async function enviarEmailResetPortal({ email, token, nombreSociedad }) {
           Este enlace expira en 2 horas. Si no solicitaste este cambio, ignora este correo.
         </p>
         <hr style="border:none;border-top:1px solid #e5e7eb">
-        <p style="color:#9ca3af;font-size:12px">GESTARGOV · Gobierno Corporativo Panameño</p>
+        <p style="color:#9ca3af;font-size:12px">GESTARCORP · Gobierno Corporativo Panameño</p>
       </div>
     `,
   });
@@ -74,10 +74,10 @@ export async function enviarAlertaObligaciones({ emailAgente, alertas }) {
   await transporter.sendMail({
     from:    process.env.SMTP_FROM,
     to:      emailAgente,
-    subject: `GESTARGOV — ${alertas.filter(a => a.diasRestantes < 0).length > 0 ? '⚠️ ' : ''}Resumen de vencimientos fiscales`,
+    subject: `GESTARCORP — ${alertas.filter(a => a.diasRestantes < 0).length > 0 ? '⚠️ ' : ''}Resumen de vencimientos fiscales`,
     html: `
       <div style="font-family:sans-serif;max-width:700px;margin:0 auto">
-        <h2 style="color:#1e40af">GESTARGOV — Alertas de Vencimientos Fiscales</h2>
+        <h2 style="color:#1e40af">GESTARCORP — Alertas de Vencimientos Fiscales</h2>
         <p>Resumen del <strong>${new Date().toLocaleDateString('es-PA', { day:'numeric', month:'long', year:'numeric' })}</strong>:</p>
         <table style="width:100%;border-collapse:collapse;font-size:13px">
           <thead>
@@ -94,11 +94,11 @@ export async function enviarAlertaObligaciones({ emailAgente, alertas }) {
         <p style="margin-top:16px">
           <a href="${process.env.FRONTEND_URL}/obligaciones"
              style="display:inline-block;background:#1e40af;color:white;padding:10px 20px;border-radius:6px;text-decoration:none">
-            Ver en GESTARGOV
+            Ver en GESTARCORP
           </a>
         </p>
         <hr style="border:none;border-top:1px solid #e5e7eb;margin-top:24px">
-        <p style="color:#9ca3af;font-size:12px">GESTARGOV · Gobierno Corporativo Panameño</p>
+        <p style="color:#9ca3af;font-size:12px">GESTARCORP · Gobierno Corporativo Panameño</p>
       </div>
     `,
   });
@@ -116,17 +116,17 @@ export async function enviarNotificacionConsulta({ emailAgente, emailPortal, nom
     await transporter.sendMail({
       from:    process.env.SMTP_FROM,
       to:      emailPortal,
-      subject: `GESTARGOV — Tu consulta sobre ${nombreSociedad} fue respondida`,
+      subject: `GESTARCORP — Tu consulta sobre ${nombreSociedad} fue respondida`,
       html: `
         <div style="font-family:sans-serif;max-width:500px;margin:0 auto">
-          <h2 style="color:#1e40af">GESTARGOV</h2>
+          <h2 style="color:#1e40af">GESTARCORP</h2>
           <p>Tu consulta sobre <strong>${nombreSociedad}</strong> ha sido respondida por tu Agente Residente.</p>
           <a href="${process.env.FRONTEND_URL}/portal/consultas"
              style="display:inline-block;background:#1e40af;color:white;padding:12px 24px;border-radius:6px;text-decoration:none;margin:16px 0">
             Ver respuesta en el portal
           </a>
           <hr style="border:none;border-top:1px solid #e5e7eb">
-          <p style="color:#9ca3af;font-size:12px">GESTARGOV · Gobierno Corporativo Panameño</p>
+          <p style="color:#9ca3af;font-size:12px">GESTARCORP · Gobierno Corporativo Panameño</p>
         </div>
       `,
     });
@@ -140,20 +140,20 @@ export async function enviarNotificacionConsulta({ emailAgente, emailPortal, nom
     await transporter.sendMail({
       from:    process.env.SMTP_FROM,
       to:      emailAgente,
-      subject: `GESTARGOV — Nueva consulta de ${nombreSociedad}`,
+      subject: `GESTARCORP — Nueva consulta de ${nombreSociedad}`,
       html: `
         <div style="font-family:sans-serif;max-width:500px;margin:0 auto">
-          <h2 style="color:#1e40af">GESTARGOV</h2>
+          <h2 style="color:#1e40af">GESTARCORP</h2>
           <p>El cliente de <strong>${nombreSociedad}</strong> envió una nueva consulta de tipo <strong>${tipo}</strong>:</p>
           <blockquote style="border-left:4px solid #1e40af;margin:16px 0;padding:8px 16px;background:#eff6ff;color:#1e3a5f">
             ${descripcion.substring(0, 300)}${descripcion.length > 300 ? '...' : ''}
           </blockquote>
           <a href="${process.env.FRONTEND_URL}/consultas"
              style="display:inline-block;background:#1e40af;color:white;padding:12px 24px;border-radius:6px;text-decoration:none;margin:8px 0">
-            Responder en GESTARGOV
+            Responder en GESTARCORP
           </a>
           <hr style="border:none;border-top:1px solid #e5e7eb">
-          <p style="color:#9ca3af;font-size:12px">GESTARGOV · Gobierno Corporativo Panameño</p>
+          <p style="color:#9ca3af;font-size:12px">GESTARCORP · Gobierno Corporativo Panameño</p>
         </div>
       `,
     });
@@ -174,10 +174,10 @@ export async function enviarBienvenidaPortal({ email, nombreSociedad, passwordTe
   await transporter.sendMail({
     from: process.env.SMTP_FROM,
     to: email,
-    subject: `GESTARGOV — Acceso al portal de ${nombreSociedad}`,
+    subject: `GESTARCORP — Acceso al portal de ${nombreSociedad}`,
     html: `
       <div style="font-family:sans-serif;max-width:500px;margin:0 auto">
-        <h2 style="color:#1e40af">GESTARGOV</h2>
+        <h2 style="color:#1e40af">GESTARCORP</h2>
         <p>Bienvenido al portal de gobierno corporativo de
            <strong>${nombreSociedad}</strong>.</p>
         <p>Sus credenciales de acceso son:</p>
@@ -193,7 +193,7 @@ export async function enviarBienvenidaPortal({ email, nombreSociedad, passwordTe
           Por seguridad, cambia tu contraseña en el primer inicio de sesión.
         </p>
         <hr style="border:none;border-top:1px solid #e5e7eb">
-        <p style="color:#9ca3af;font-size:12px">GESTARGOV · Gobierno Corporativo Panameño</p>
+        <p style="color:#9ca3af;font-size:12px">GESTARCORP · Gobierno Corporativo Panameño</p>
       </div>
     `,
   });

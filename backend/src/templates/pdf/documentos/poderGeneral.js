@@ -89,7 +89,7 @@ export function htmlPoderGeneral({ sociedad, directores, apoderado, facultades, 
   </div>` : ''}
 
   <div class="pie-pagina">
-    GESTARGOV · Poder General · ${sociedad.nombre} · ${formatearFecha(new Date())}
+    GESTARCORP · Poder General · ${sociedad.nombre} · ${formatearFecha(new Date())}
   </div>
   </body></html>`;
 }

@@ -116,7 +116,7 @@ export function htmlCertificadoIncumbencia({ sociedad, directores, agenteNombre 
   </div>
 
   <div class="pie-pagina">
-    GESTARGOV · Certificado de Incumbencia · ${sociedad.nombre} · ${formatearFecha(new Date())}
+    GESTARCORP · Certificado de Incumbencia · ${sociedad.nombre} · ${formatearFecha(new Date())}
   </div>
   </body></html>`;
 }

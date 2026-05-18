@@ -125,7 +125,7 @@ export function htmlDeclaracionBeneficiarios({ sociedad, beneficiarios }) {
   </div>
 
   <div class="pie-pagina">
-    GESTARGOV · Registro de Beneficiarios Finales — Ley 52 de 2016 · ${fechaHoy}
+    GESTARCORP · Registro de Beneficiarios Finales — Ley 52 de 2016 · ${fechaHoy}
   </div>
   </body></html>`;
 }

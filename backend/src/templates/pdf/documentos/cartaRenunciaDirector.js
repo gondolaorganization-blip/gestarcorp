@@ -55,7 +55,7 @@ export function htmlCartaRenunciaDirector({ sociedad, director, agenteNombre, fe
   </div>
 
   <div class="pie-pagina">
-    GESTARGOV · Carta de Renuncia de Director · ${sociedad.nombre} · ${formatearFecha(new Date())}
+    GESTARCORP · Carta de Renuncia de Director · ${sociedad.nombre} · ${formatearFecha(new Date())}
   </div>
   </body></html>`;
 }

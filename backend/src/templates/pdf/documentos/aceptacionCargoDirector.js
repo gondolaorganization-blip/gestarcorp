@@ -60,7 +60,7 @@ export function htmlAceptacionCargoDirector({ sociedad, director, agenteNombre }
   </div>
 
   <div class="pie-pagina">
-    GESTARGOV · Aceptación de Cargo de Director · ${sociedad.nombre} · ${formatearFecha(new Date())}
+    GESTARCORP · Aceptación de Cargo de Director · ${sociedad.nombre} · ${formatearFecha(new Date())}
   </div>
   </body></html>`;
 }

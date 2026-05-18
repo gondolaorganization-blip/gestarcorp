@@ -118,7 +118,7 @@ export async function docxDeclaracionBeneficiarios({ sociedad, beneficiarios }) 
     new Paragraph({ text: '', spacing: { after: 300 } }),
     new Paragraph({
       children: [italic(
-        `GESTARGOV · Registro de Beneficiarios Finales — Ley 52 de 2016 · ${fechaHoy}`, 18
+        `GESTARCORP · Registro de Beneficiarios Finales — Ley 52 de 2016 · ${fechaHoy}`, 18
       )],
       alignment: AlignmentType.CENTER,
       border: { top: { style: BorderStyle.SINGLE, size: 6, color: '888888' } },

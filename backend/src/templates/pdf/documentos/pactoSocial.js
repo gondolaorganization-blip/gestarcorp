@@ -123,7 +123,7 @@ export function htmlPactoSocial({ sociedad, directores, accionistas }) {
   </div>
 
   <div class="pie-pagina">
-    GESTARGOV · Pacto Social · ${sociedad.nombre} · ${formatearFecha(new Date())}
+    GESTARCORP · Pacto Social · ${sociedad.nombre} · ${formatearFecha(new Date())}
   </div>
   </body></html>`;
 }

@@ -6,9 +6,9 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2024-04-
 
 // Precios de los planes (USD)
 const PLANES = {
-  MENSUAL:  { monto: 39.00,  label: 'Plan Mensual GESTARGOV — $39/mes' },
-  ANUAL:    { monto: 350.00, label: 'Plan Anual GESTARGOV — $350/año (Agente Residente incluido)' },
-  FUNDADOR: { monto: 300.00, label: 'Plan Fundador GESTARGOV — $300/año (precio especial)' },
+  MENSUAL:  { monto: 39.00,  label: 'Plan Mensual GESTARCORP — $39/mes' },
+  ANUAL:    { monto: 350.00, label: 'Plan Anual GESTARCORP — $350/año (Agente Residente incluido)' },
+  FUNDADOR: { monto: 300.00, label: 'Plan Fundador GESTARCORP — $300/año (precio especial)' },
 };
 
 // IDs de precios Stripe por plan (configurados en .env)
@@ -276,7 +276,7 @@ export async function yappyIniciar(req, res) {
     subtotal: total,
     taxes:    '0.00',
     total,
-    domain:   process.env.FRONTEND_URL || 'https://gestargov.com',
+    domain:   process.env.FRONTEND_URL || 'https://gestarcorp.com',
     successUrl: `${process.env.API_URL}/api/suscripciones/yappy/callback?orderId=${orderId}&status=success`,
     failUrl:    `${process.env.API_URL}/api/suscripciones/yappy/callback?orderId=${orderId}&status=fail`,
   };

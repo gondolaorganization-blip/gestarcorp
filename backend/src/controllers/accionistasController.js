@@ -304,7 +304,7 @@ export async function exportarPDF(req, res) {
   </div>
 
   <div class="pie-pagina">
-    GESTARGOV · Gestión Societaria Panameña · ${formatearFecha(new Date())}
+    GESTARCORP · Gestión Societaria Panameña · ${formatearFecha(new Date())}
   </div>
   </body></html>`;
 

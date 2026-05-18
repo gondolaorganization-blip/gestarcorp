@@ -196,7 +196,7 @@ export function htmlFichaSociedad({ sociedad, directores, accionistas, beneficia
   </div>
 
   <div class="pie-pagina">
-    GESTARGOV · Ficha Corporativa · ${sociedad.nombre} · ${formatearFecha(new Date())}
+    GESTARCORP · Ficha Corporativa · ${sociedad.nombre} · ${formatearFecha(new Date())}
   </div>
   </body></html>`;
 }

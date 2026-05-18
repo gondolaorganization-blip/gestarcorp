@@ -79,7 +79,7 @@ export function htmlReporteCartera({ sociedades, agenteNombre, fechaCorte }) {
   </table>
 
   <div class="pie-pagina">
-    GESTARGOV · Reporte de Cartera · ${agenteNombre || 'Agente Residente'} · ${formatearFecha(new Date())}
+    GESTARCORP · Reporte de Cartera · ${agenteNombre || 'Agente Residente'} · ${formatearFecha(new Date())}
   </div>
   </body></html>`;
 }

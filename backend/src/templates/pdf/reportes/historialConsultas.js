@@ -65,7 +65,7 @@ export function htmlHistorialConsultas({ consultas, sociedad, agenteNombre, peri
     : seccionConsultas}
 
   <div class="pie-pagina">
-    GESTARGOV · Historial de Consultas · ${formatearFecha(new Date())}
+    GESTARCORP · Historial de Consultas · ${formatearFecha(new Date())}
   </div>
   </body></html>`;
 }

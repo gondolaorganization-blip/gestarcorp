@@ -63,7 +63,7 @@ export function htmlCertificadoAccion({ sociedad, accion }) {
 </head>
 <body>
   <div class="certificado">
-    <div class="marca-agua">GESTARGOV</div>
+    <div class="marca-agua">GESTARCORP</div>
 
     <div class="encabezado">
       <h1>${sociedad.nombre}</h1>
@@ -138,7 +138,7 @@ export function htmlCertificadoAccion({ sociedad, accion }) {
     </div>
 
     <div class="pie-pagina">
-      GESTARGOV · Gestión Societaria Panameña · Certificado generado el ${formatearFecha(new Date())}
+      GESTARCORP · Gestión Societaria Panameña · Certificado generado el ${formatearFecha(new Date())}
     </div>
   </div>
 </body>

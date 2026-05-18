@@ -1,7 +1,7 @@
 {
-  "name": "gestargov-backend",
+  "name": "gestarcorp-backend",
   "version": "1.0.0",
-  "description": "GESTARGOV — Backend API para gobierno corporativo panameño",
+  "description": "GESTARCORP — Backend API para gobierno corporativo panameño",
   "main": "src/index.js",
   "type": "module",
   "scripts": {
