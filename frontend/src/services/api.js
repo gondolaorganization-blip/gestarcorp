@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const api = axios.create({ baseURL: '/api' });
+const api = axios.create({ baseURL: import.meta.env.VITE_API_URL || '/api' });
 
 api.interceptors.request.use(cfg => {
   const token = localStorage.getItem('token');
@@ -23,7 +23,7 @@ api.interceptors.response.use(
 export default api;
 
 // Portal API (token separado)
-export const portalApi = axios.create({ baseURL: '/api' });
+export const portalApi = axios.create({ baseURL: import.meta.env.VITE_API_URL || '/api' });
 
 portalApi.interceptors.request.use(cfg => {
   const token = localStorage.getItem('portalToken');
