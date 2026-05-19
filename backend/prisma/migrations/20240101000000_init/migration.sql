@@ -1,4 +1,7 @@
 -- CreateEnum
+CREATE TYPE "MetodoPago" AS ENUM ('STRIPE', 'YAPPY', 'TRANSFERENCIA', 'EFECTIVO');
+
+-- CreateEnum
 CREATE TYPE "RolUsuario" AS ENUM ('SUPERADMIN', 'AGENTE');
 
 -- CreateEnum
