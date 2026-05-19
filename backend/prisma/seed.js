@@ -7,16 +7,16 @@ async function main() {
   console.log('Iniciando seed de GESTARCORP...');
 
   // Usuario agente residente (administrador)
-  const passwordHash = await bcrypt.hash('gestarcorp2024', 10);
+  const passwordHash = await bcrypt.hash('GestarSoft2026!', 10);
 
   const agente = await prisma.usuario.upsert({
-    where: { email: 'admin@gestarcorp.com' },
-    update: {},
+    where: { email: 'admin@gestarsoft.com' },
+    update: { passwordHash },
     create: {
-      email: 'admin@gestarcorp.com',
+      email: 'admin@gestarsoft.com',
       passwordHash,
-      nombre: 'Agente Residente',
-      rol: 'AGENTE',
+      nombre: 'Administrador',
+      rol: 'SUPERADMIN',
       activo: true,
     }
   });
