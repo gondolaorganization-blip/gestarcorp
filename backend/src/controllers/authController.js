@@ -299,16 +299,18 @@ export async function actualizarAccesoPortal(req, res) {
 
 // ─── GESTIÓN DE AGENTES (SUPERADMIN) ─────────────────────────────────────────
 
+const AGENTE_SELECT = { id: true, email: true, nombre: true, rol: true, activo: true, cur: true, creadoEn: true };
+
 export async function listarAgentes(req, res) {
   const agentes = await prisma.usuario.findMany({
     orderBy: { creadoEn: 'desc' },
-    select: { id: true, email: true, nombre: true, rol: true, activo: true, creadoEn: true },
+    select: AGENTE_SELECT,
   });
   res.json(agentes);
 }
 
 export async function crearAgente(req, res) {
-  const { email, password, nombre, rol } = req.body;
+  const { email, password, nombre, rol, cur } = req.body;
   if (!email || !password || !nombre) {
     return res.status(400).json({ error: 'email, password y nombre son requeridos.' });
   }
@@ -320,14 +322,14 @@ export async function crearAgente(req, res) {
 
   const passwordHash = await hashPassword(password);
   const agente = await prisma.usuario.create({
-    data: { email: email.toLowerCase().trim(), passwordHash, nombre, rol: rol || 'AGENTE' },
-    select: { id: true, email: true, nombre: true, rol: true, activo: true, creadoEn: true },
+    data: { email: email.toLowerCase().trim(), passwordHash, nombre, rol: rol || 'AGENTE', cur: cur || null },
+    select: AGENTE_SELECT,
   });
   res.status(201).json(agente);
 }
 
 export async function actualizarAgente(req, res) {
-  const { nombre, email, password, activo, rol } = req.body;
+  const { nombre, email, password, activo, rol, cur } = req.body;
   const agente = await prisma.usuario.findUnique({ where: { id: req.params.uid } });
   if (!agente) return res.status(404).json({ error: 'Usuario no encontrado.' });
 
@@ -340,6 +342,7 @@ export async function actualizarAgente(req, res) {
   }
   if (activo !== undefined) data.activo = activo;
   if (rol) data.rol = rol;
+  if (cur !== undefined) data.cur = cur || null;
   if (password) {
     const errorPass = validarPassword(password);
     if (errorPass) return res.status(400).json({ error: errorPass });
@@ -349,7 +352,7 @@ export async function actualizarAgente(req, res) {
   const updated = await prisma.usuario.update({
     where: { id: req.params.uid },
     data,
-    select: { id: true, email: true, nombre: true, rol: true, activo: true, creadoEn: true },
+    select: AGENTE_SELECT,
   });
   res.json(updated);
 }

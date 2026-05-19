@@ -43,6 +43,45 @@ export const uploadComprobante = multer({
   limits: { fileSize: MAX_SIZE },
 }).single('comprobante');
 
+export const uploadDiligencia = multer({
+  storage:  crearStorage('diligencia'),
+  fileFilter: filtroDocumentos,
+  limits: { fileSize: MAX_SIZE },
+}).single('archivo');
+
+export const uploadMedida = multer({
+  storage:  crearStorage('mitigadoras'),
+  fileFilter: filtroDocumentos,
+  limits: { fileSize: MAX_SIZE },
+}).single('archivo');
+
+export const uploadEvento = multer({
+  storage:  crearStorage('eventos'),
+  fileFilter: filtroDocumentos,
+  limits: { fileSize: MAX_SIZE },
+}).single('archivo');
+
+export const uploadCumplimiento = multer({
+  storage:  crearStorage('cumplimiento'),
+  fileFilter: filtroDocumentos,
+  limits: { fileSize: MAX_SIZE },
+}).single('archivo');
+
+function filtroSanciones(req, file, cb) {
+  const ext = path.extname(file.originalname).toLowerCase();
+  if (ext === '.pdf' || ext === '.xml') {
+    cb(null, true);
+  } else {
+    cb(new Error('Solo se permiten archivos PDF (notificación UAF) o XML (lista ONU).'));
+  }
+}
+
+export const uploadListaSanciones = multer({
+  storage: crearStorage('sanciones'),
+  fileFilter: filtroSanciones,
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50 MB
+}).single('archivo');
+
 // Middleware que maneja errores de multer de forma limpia
 export function handleUpload(uploadFn) {
   return (req, res, next) => {

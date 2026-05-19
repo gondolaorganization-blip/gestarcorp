@@ -29,7 +29,7 @@ export default function PortalLogin() {
             <span className="text-white font-black text-xl">GG</span>
           </div>
           <h1 className="text-2xl font-bold text-gray-900">Portal Cliente</h1>
-          <p className="text-sm text-gray-500 mt-1">GESTARGOV — Acceso para clientes</p>
+          <p className="text-sm text-gray-500 mt-1">GESTARCORP — Acceso para clientes</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">

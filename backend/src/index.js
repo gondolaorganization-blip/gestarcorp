@@ -13,10 +13,14 @@ import { portalRouter }          from './routes/portal.js';
 import { dashboardRouter }       from './routes/dashboard.js';
 import { suscripcionesRouter }   from './routes/suscripciones.js';
 import { reportesRouter }        from './routes/reportes.js';
+import { plantillasRouter }      from './routes/plantillas.js';
+import { cumplimientoRouter }    from './routes/cumplimiento.js';
+import { screeningRouter }       from './routes/screening.js';
 import { alertasBeneficiarios } from './controllers/beneficiariosController.js';
 import { listarTodasConsultas, estadisticasConsultas } from './controllers/consultasController.js';
 import { alertasObligaciones, obligacionesGlobal, dispararVerificacion } from './controllers/alertasController.js';
-import { iniciarCronObligaciones } from './jobs/verificarObligaciones.js';
+import { iniciarCronObligaciones }    from './jobs/verificarObligaciones.js';
+import { iniciarCronRecordatorios }  from './jobs/recordatoriosCompletitud.js';
 import { requireAuth, requireAgente } from './middleware/auth.js';
 import prisma from './utils/prisma.js';
 
@@ -49,6 +53,9 @@ app.use('/api/portal',         portalRouter);
 app.use('/api/dashboard',      dashboardRouter);
 app.use('/api/suscripciones',  suscripcionesRouter);
 app.use('/api/reportes',       reportesRouter);
+app.use('/api/plantillas',     plantillasRouter);
+app.use('/api/cumplimiento',   cumplimientoRouter);
+app.use('/api/screening',      screeningRouter);
 app.get('/api/alertas/beneficiarios',           requireAuth, requireAgente, alertasBeneficiarios);
 app.get('/api/alertas/obligaciones',            requireAuth, requireAgente, alertasObligaciones);
 app.get('/api/alertas/obligaciones/global',     requireAuth, requireAgente, obligacionesGlobal);
@@ -56,11 +63,19 @@ app.post('/api/alertas/obligaciones/verificar', requireAuth, requireAgente, disp
 app.get('/api/consultas',                       requireAuth, requireAgente, listarTodasConsultas);
 app.get('/api/consultas/estadisticas',          requireAuth, requireAgente, estadisticasConsultas);
 
+// En producción sirve el build del frontend en /corp (subdirectorio del dominio)
+if (process.env.NODE_ENV === 'production') {
+  const frontendDist = path.join(__dirname, '..', '..', 'frontend', 'dist');
+  app.use('/corp', express.static(frontendDist));
+  app.get('/corp/*', (_req, res) => res.sendFile(path.join(frontendDist, 'index.html')));
+}
+
 app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`GESTARCORP API corriendo en http://localhost:${PORT}`);
   iniciarCronObligaciones();
+  iniciarCronRecordatorios();
 });
 
 export default app;

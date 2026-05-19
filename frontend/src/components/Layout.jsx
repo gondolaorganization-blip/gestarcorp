@@ -2,7 +2,7 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import {
   LayoutDashboard, Building2, Bell, MessageSquare,
-  BarChart3, LogOut, Menu, X, CreditCard, Users, UserCog
+  BarChart3, LogOut, Menu, X, CreditCard, Users, UserCog, FileText, ShieldCheck, ShieldAlert,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -15,6 +15,9 @@ const NAV = [
   { to: '/reportes',        label: 'Reportes',        icon: BarChart3 },
   { to: '/portal-usuarios', label: 'Portal clientes', icon: Users },
   { to: '/agentes',         label: 'Agentes',         icon: UserCog },
+  { to: '/plantillas',      label: 'Plantillas',      icon: FileText },
+  { to: '/cumplimiento',    label: 'Cumplimiento',    icon: ShieldCheck },
+  { to: '/screening',       label: 'Sanciones ONU',   icon: ShieldAlert },
 ];
 
 export default function Layout() {
@@ -46,7 +49,7 @@ export default function Layout() {
               <span className="text-brand-700 font-black text-xs">GG</span>
             </div>
             <div>
-              <p className="text-white font-bold text-sm leading-none">GESTARGOV</p>
+              <p className="text-white font-bold text-sm leading-none">GESTARCORP</p>
               <p className="text-brand-200 text-xs mt-0.5">Gobierno Corporativo</p>
             </div>
           </div>

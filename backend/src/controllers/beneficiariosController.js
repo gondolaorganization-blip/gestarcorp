@@ -36,60 +36,86 @@ export async function obtenerBeneficiario(req, res) {
   res.json(b);
 }
 
+function nombreDisplay(d) {
+  if (d.tipoBeneficiario === 'PERSONA_NATURAL') {
+    const partes = [d.primerNombre, d.segundoNombre, d.primerApellido, d.segundoApellido].filter(Boolean);
+    return partes.length ? partes.join(' ') : (d.nombre || '').trim();
+  }
+  return (d.nombre || '').trim();
+}
+
+function buildData(d) {
+  const tipo = d.tipoBeneficiario || 'PERSONA_NATURAL';
+  return {
+    tipoBeneficiario:       tipo,
+    nombre:                 nombreDisplay(d),
+    // Persona Natural
+    primerNombre:           d.primerNombre           || null,
+    segundoNombre:          d.segundoNombre          || null,
+    primerApellido:         d.primerApellido         || null,
+    segundoApellido:        d.segundoApellido        || null,
+    tipoDocumento:          d.tipoDocumento          || null,
+    numeroDocumento:        d.numeroDocumento        || null,
+    nacionalidad:           d.nacionalidad           || null,
+    fechaNacimiento:        d.fechaNacimiento        ? new Date(d.fechaNacimiento) : null,
+    lugarNacimiento:        d.lugarNacimiento        || null,
+    profesion:              d.profesion              || null,
+    actividadDeclarada:     d.actividadDeclarada     || null,
+    rucNT:                  d.rucNT                  || null,
+    jurisdiccion:           d.jurisdiccion           || null,
+    domicilio:              d.domicilio              || null,
+    esPEP:                  Boolean(d.esPEP),
+    cargoPublico:           d.cargoPublico           || null,
+    // PJ Bolsa
+    paisConstitucion:       d.paisConstitucion       || null,
+    nombreBolsa:            d.nombreBolsa            || null,
+    jurisdiccionBolsa:      d.jurisdiccionBolsa      || null,
+    // Estado
+    fechaConstitucionEstado: d.fechaConstitucionEstado ? new Date(d.fechaConstitucionEstado) : null,
+    // Compartido
+    representanteLegal:     d.representanteLegal     || null,
+    personaContacto:        d.personaContacto        || null,
+    paisSede:               d.paisSede               || null,
+    // Contacto
+    email:                  d.email                  || null,
+    telefonoPrefijo:        d.telefonoPrefijo        || '+507',
+    telefono:               d.telefono               || null,
+    // Control
+    porcentajeControl:      d.porcentajeControl      ? Number(d.porcentajeControl) : null,
+    tipoControl:            d.tipoControl            || 'DIRECTO',
+    motivoCondicion:        d.motivoCondicion        || null,
+    fechaDeclaracion:       d.fechaDeclaracion       ? new Date(d.fechaDeclaracion) : null,
+    notas:                  d.notas                  || null,
+  };
+}
+
 export async function crearBeneficiario(req, res) {
   const d = req.body;
-  if (!d.nombre || !d.tipoDocumento || !d.numeroDocumento) {
-    return res.status(400).json({
-      error: 'Nombre, tipo y número de documento son requeridos.'
-    });
-  }
+  const tipo = d.tipoBeneficiario || 'PERSONA_NATURAL';
+  if (tipo === 'PERSONA_NATURAL' && (!d.primerNombre || !d.primerApellido))
+    return res.status(400).json({ error: 'Primer nombre y primer apellido son requeridos.' });
+  if (tipo !== 'PERSONA_NATURAL' && !d.nombre)
+    return res.status(400).json({ error: 'El nombre es requerido.' });
 
   await prisma.sociedad.findUniqueOrThrow({ where: { id: req.params.id } });
 
   const b = await prisma.beneficiarioFinal.create({
-    data: {
-      sociedadId:        req.params.id,
-      nombre:            d.nombre.trim(),
-      tipoDocumento:     d.tipoDocumento,
-      numeroDocumento:   d.numeroDocumento.trim(),
-      nacionalidad:      d.nacionalidad      || null,
-      fechaNacimiento:   d.fechaNacimiento   ? new Date(d.fechaNacimiento) : null,
-      domicilio:         d.domicilio         || null,
-      porcentajeControl: d.porcentajeControl ? Number(d.porcentajeControl) : null,
-      tipoControl:       d.tipoControl       || 'DIRECTO',
-      esPEP:             Boolean(d.esPEP),
-      cargoPublico:      d.cargoPublico      || null,
-      fechaDeclaracion:  d.fechaDeclaracion  ? new Date(d.fechaDeclaracion) : new Date(),
-      fechaActualizacion: new Date(),
-      verificado:        false,
-      notas:             d.notas            || null,
-    }
+    data: { sociedadId: req.params.id, ...buildData(d), fechaActualizacion: new Date(), verificado: false },
   });
   res.status(201).json(b);
 }
 
 export async function actualizarBeneficiario(req, res) {
   const d = req.body;
+  const actual = await prisma.beneficiarioFinal.findUniqueOrThrow({ where: { id: req.params.bId } });
+  const merged = { ...actual, ...d, tipoBeneficiario: d.tipoBeneficiario || actual.tipoBeneficiario };
   const b = await prisma.beneficiarioFinal.update({
     where: { id: req.params.bId },
     data: {
-      ...(d.nombre             && { nombre:            d.nombre.trim() }),
-      ...(d.tipoDocumento      && { tipoDocumento:      d.tipoDocumento }),
-      ...(d.numeroDocumento    && { numeroDocumento:    d.numeroDocumento.trim() }),
-      ...(d.nacionalidad  !== undefined && { nacionalidad:  d.nacionalidad  || null }),
-      ...(d.fechaNacimiento    && { fechaNacimiento:    new Date(d.fechaNacimiento) }),
-      ...(d.domicilio     !== undefined && { domicilio:     d.domicilio     || null }),
-      ...(d.porcentajeControl !== undefined && {
-        porcentajeControl: d.porcentajeControl ? Number(d.porcentajeControl) : null
-      }),
-      ...(d.tipoControl        && { tipoControl:        d.tipoControl }),
-      ...(d.esPEP         !== undefined && { esPEP:         Boolean(d.esPEP) }),
-      ...(d.cargoPublico  !== undefined && { cargoPublico:  d.cargoPublico  || null }),
-      ...(d.fechaDeclaracion   && { fechaDeclaracion:   new Date(d.fechaDeclaracion) }),
-      ...(d.verificado    !== undefined && { verificado:    Boolean(d.verificado) }),
-      ...(d.notas         !== undefined && { notas:         d.notas        || null }),
-      fechaActualizacion: new Date(), // siempre actualiza la fecha al editar
-    }
+      ...buildData(merged),
+      ...(d.verificado !== undefined && { verificado: Boolean(d.verificado) }),
+      fechaActualizacion: new Date(),
+    },
   });
   res.json(b);
 }

@@ -16,10 +16,14 @@ import Suscripciones     from './pages/Suscripciones.jsx';
 import UsuariosPortal    from './pages/UsuariosPortal.jsx';
 
 import Agentes           from './pages/Agentes.jsx';
+import Plantillas        from './pages/Plantillas.jsx';
+import Cumplimiento      from './pages/Cumplimiento.jsx';
+import Screening        from './pages/Screening.jsx';
 import PortalLogin       from './pages/portal/PortalLogin.jsx';
 import PortalObligaciones from './pages/portal/PortalObligaciones.jsx';
 import PortalConsultas   from './pages/portal/PortalConsultas.jsx';
 import PortalSociedad    from './pages/portal/PortalSociedad.jsx';
+import PortalCompletar   from './pages/portal/PortalCompletar.jsx';
 
 function RequireAuth({ children }) {
   const { isAuth } = useAuth();
@@ -49,6 +53,7 @@ export default function App() {
               <Route path="sociedad"     element={<PortalSociedad />} />
               <Route path="obligaciones" element={<PortalObligaciones />} />
               <Route path="consultas"    element={<PortalConsultas />} />
+              <Route path="completar"    element={<PortalCompletar />} />
             </Route>
 
             {/* Panel agente */}
@@ -65,6 +70,9 @@ export default function App() {
               <Route path="suscripciones"      element={<Suscripciones />} />
               <Route path="portal-usuarios"    element={<UsuariosPortal />} />
               <Route path="agentes"            element={<Agentes />} />
+              <Route path="plantillas"         element={<Plantillas />} />
+              <Route path="cumplimiento"       element={<Cumplimiento />} />
+              <Route path="screening"          element={<Screening />} />
             </Route>
 
             {/* Fallback */}

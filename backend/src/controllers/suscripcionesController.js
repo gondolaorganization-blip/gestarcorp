@@ -356,6 +356,97 @@ export async function yappyWebhook(req, res) {
   res.json({ recibido: true });
 }
 
+// ─── PAYPAL ──────────────────────────────────────────────────────────────────
+
+const PAYPAL_BASE = process.env.PAYPAL_MODE === 'live'
+  ? 'https://api-m.paypal.com'
+  : 'https://api-m.sandbox.paypal.com';
+
+async function paypalToken() {
+  const creds = Buffer.from(
+    `${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_CLIENT_SECRET}`
+  ).toString('base64');
+  const r = await fetch(`${PAYPAL_BASE}/v1/oauth2/token`, {
+    method:  'POST',
+    headers: { Authorization: `Basic ${creds}`, 'Content-Type': 'application/x-www-form-urlencoded' },
+    body:    'grant_type=client_credentials',
+  });
+  const d = await r.json();
+  if (!d.access_token) throw new Error(`PayPal auth error: ${JSON.stringify(d)}`);
+  return d.access_token;
+}
+
+async function paypalRequest(method, path, body) {
+  const token = await paypalToken();
+  const r = await fetch(`${PAYPAL_BASE}${path}`, {
+    method,
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    ...(body ? { body: JSON.stringify(body) } : {}),
+  });
+  return r.json();
+}
+
+/**
+ * POST /api/suscripciones/paypal/crear-orden
+ * Body: { sociedadId, plan }
+ * Crea una orden PayPal y registra la suscripción como PENDIENTE.
+ */
+export async function paypalCrearOrden(req, res) {
+  const { sociedadId, plan } = req.body;
+  if (!PLANES[plan]) return res.status(400).json({ error: `Plan no válido: ${plan}` });
+  await prisma.sociedad.findUniqueOrThrow({ where: { id: sociedadId } });
+
+  const planData = PLANES[plan];
+  const order = await paypalRequest('POST', '/v2/checkout/orders', {
+    intent: 'CAPTURE',
+    purchase_units: [{
+      amount:      { currency_code: 'USD', value: planData.monto.toFixed(2) },
+      description: planData.label,
+    }],
+  });
+
+  if (!order.id) throw new Error(`PayPal orden error: ${JSON.stringify(order)}`);
+
+  const suscripcion = await prisma.suscripcion.create({
+    data: {
+      sociedadId, plan,
+      estado:       'PENDIENTE',
+      monto:        planData.monto,
+      moneda:       'USD',
+      metodoPago:   'PAYPAL',
+      paypalOrderId: order.id,
+    },
+  });
+
+  res.json({ orderID: order.id, suscripcionId: suscripcion.id });
+}
+
+/**
+ * POST /api/suscripciones/paypal/capturar
+ * Body: { orderID, suscripcionId }
+ * Captura el pago aprobado y activa la suscripción.
+ */
+export async function paypalCapturar(req, res) {
+  const { orderID, suscripcionId } = req.body;
+
+  const capture = await paypalRequest('POST', `/v2/checkout/orders/${orderID}/capture`);
+  if (capture.status !== 'COMPLETED') {
+    return res.status(400).json({ error: 'Pago no completado', status: capture.status });
+  }
+
+  const sus = await prisma.suscripcion.findUnique({ where: { id: suscripcionId } });
+  if (!sus) return res.status(404).json({ error: 'Suscripción no encontrada' });
+  if (sus.estado === 'ACTIVA') return res.json({ mensaje: 'Ya activa', suscripcionId });
+
+  const captureId = capture.purchase_units?.[0]?.payments?.captures?.[0]?.id;
+  const activada  = await activarSuscripcion(suscripcionId, 'PAYPAL', orderID, {
+    paypalOrderId:   orderID,
+    paypalCaptureId: captureId,
+  });
+
+  res.json({ mensaje: 'Pago confirmado y suscripción activada', suscripcion: activada });
+}
+
 // ─── MANUAL (TRANSFERENCIA / EFECTIVO) ───────────────────────────────────────
 
 /**
@@ -425,6 +516,27 @@ export async function vencimientosProximos(req, res) {
   const resultado = suscripciones.map(s => ({
     ...s,
     diasRestantes: Math.ceil((new Date(s.fechaVencimiento) - Date.now()) / 86400000),
+  }));
+
+  res.json(resultado);
+}
+
+/**
+ * GET /api/suscripciones/trials
+ * Lista sociedades del agente que están en período de prueba.
+ */
+export async function listarTrials(req, res) {
+  const sociedades = await prisma.sociedad.findMany({
+    where: { agenteId: req.user.id, planCliente: 'TRIAL', estado: 'ACTIVA' },
+    select: { id: true, nombre: true, ficha: true, fechaVencimiento: true },
+    orderBy: { fechaVencimiento: 'asc' },
+  });
+
+  const resultado = sociedades.map(s => ({
+    ...s,
+    diasRestantes: s.fechaVencimiento
+      ? Math.ceil((new Date(s.fechaVencimiento) - Date.now()) / 86400000)
+      : null,
   }));
 
   res.json(resultado);

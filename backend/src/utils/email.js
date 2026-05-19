@@ -160,6 +160,79 @@ export async function enviarNotificacionConsulta({ emailAgente, emailPortal, nom
   }
 }
 
+export async function enviarRecordatorioCompletitud({ emailPortal, nombreSociedad, porcentajeGlobal, tierMasUrgente, itemsPendientes }) {
+  const transporter = crearTransporter();
+  const url = `${process.env.FRONTEND_URL}/portal/completar`;
+
+  const TIER_BADGE = {
+    CRITICA: `<span style="background:#dc2626;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:bold">CRÍTICA</span>`,
+    ALTA:    `<span style="background:#d97706;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:bold">ALTA</span>`,
+    MEDIA:   `<span style="background:#2563eb;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:bold">MEDIA</span>`,
+    BAJA:    `<span style="background:#6b7280;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:bold">BAJA</span>`,
+  };
+
+  const filas = itemsPendientes.slice(0, 15).map(item => `
+    <tr>
+      <td style="padding:8px 10px;border-bottom:1px solid #e5e7eb">${TIER_BADGE[item.tier]}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #e5e7eb">${item.label}</td>
+    </tr>`).join('');
+
+  const resto = itemsPendientes.length > 15
+    ? `<p style="color:#6b7280;font-size:12px;margin-top:8px">...y ${itemsPendientes.length - 15} ítem(s) más.</p>`
+    : '';
+
+  const barraColor = porcentajeGlobal >= 80 ? '#16a34a' : porcentajeGlobal >= 50 ? '#d97706' : '#dc2626';
+
+  if (!transporter) {
+    console.log(`[EMAIL SIMULADO] Recordatorio completitud → ${emailPortal} | ${nombreSociedad} | ${porcentajeGlobal}% completo | ${itemsPendientes.length} pendientes`);
+    return;
+  }
+
+  await transporter.sendMail({
+    from:    process.env.SMTP_FROM,
+    to:      emailPortal,
+    subject: `GESTARCORP — Información pendiente de ${nombreSociedad} (${porcentajeGlobal}% completo)`,
+    html: `
+      <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
+        <h2 style="color:#1e40af">GESTARCORP — Información Pendiente</h2>
+        <p>Estimado cliente de <strong>${nombreSociedad}</strong>,</p>
+        <p>Su expediente societario tiene información pendiente de completar.
+           Puede actualizarla directamente en su portal en pocos minutos.</p>
+
+        <div style="background:#f3f4f6;border-radius:8px;padding:16px;margin:16px 0">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+            <span style="font-weight:bold;color:#111">Completitud del expediente</span>
+            <span style="font-weight:bold;color:${barraColor}">${porcentajeGlobal}%</span>
+          </div>
+          <div style="background:#e5e7eb;border-radius:4px;height:8px">
+            <div style="background:${barraColor};height:8px;border-radius:4px;width:${porcentajeGlobal}%"></div>
+          </div>
+        </div>
+
+        <p style="font-weight:bold;margin-bottom:8px">Información pendiente:</p>
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+          <tbody>${filas}</tbody>
+        </table>
+        ${resto}
+
+        <div style="margin-top:24px">
+          <a href="${url}"
+             style="display:inline-block;background:#1e40af;color:white;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:bold">
+            Completar información en el portal
+          </a>
+        </div>
+
+        <p style="color:#6b7280;font-size:12px;margin-top:24px">
+          Una vez que complete toda la información, estos recordatorios se suspenderán automáticamente.
+          Si ya completó esta información con su agente residente, puede ignorar este correo.
+        </p>
+        <hr style="border:none;border-top:1px solid #e5e7eb;margin-top:16px">
+        <p style="color:#9ca3af;font-size:12px">GESTARCORP · Gobierno Corporativo Panameño</p>
+      </div>
+    `,
+  });
+}
+
 export async function enviarBienvenidaPortal({ email, nombreSociedad, passwordTemporal }) {
   const transporter = crearTransporter();
   const url = `${process.env.FRONTEND_URL}/portal/login`;

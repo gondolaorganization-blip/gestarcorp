@@ -41,10 +41,21 @@ export default function Dashboard() {
       api.get('/dashboard/actividad?limit=8'),
       api.get('/dashboard/sociedades'),
     ]).then(([d, a, s]) => {
-      setData(d.data);
-      setActividad(a.data);
-      setSociedadesRiesgo(s.data.slice(0, 6));
-    }).finally(() => setLoading(false));
+      const r = d.data?.resumen || {};
+      setData({
+        totalSociedades: r.sociedades?.total,
+        activas:         r.sociedades?.activas,
+        anual:           r.planes?.anual,
+        mensual:         r.planes?.mensual,
+        ingresosMes:     r.ingresos?.mesCorriente,
+        alertas: {
+          obligVencidas: r.alertas?.obligacionesVencidas,
+          benefSinVerif: r.alertas?.benefSinVerificar,
+        },
+      });
+      setActividad(Array.isArray(a.data) ? a.data : []);
+      setSociedadesRiesgo((Array.isArray(s.data) ? s.data : []).slice(0, 6));
+    }).catch(() => {}).finally(() => setLoading(false));
   }, []);
 
   if (loading) return <PageSpinner />;

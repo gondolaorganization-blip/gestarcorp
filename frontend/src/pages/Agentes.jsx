@@ -27,12 +27,12 @@ export default function Agentes() {
 
   function openNew() {
     setEditing(null);
-    setForm({ nombre: '', email: '', password: '', rol: 'AGENTE', activo: true });
+    setForm({ nombre: '', email: '', password: '', rol: 'AGENTE', activo: true, cur: '' });
     setShowModal(true);
   }
   function openEdit(a) {
     setEditing(a);
-    setForm({ nombre: a.nombre, email: a.email, password: '', rol: a.rol, activo: a.activo });
+    setForm({ nombre: a.nombre, email: a.email, password: '', rol: a.rol, activo: a.activo, cur: a.cur || '' });
     setShowModal(true);
   }
 
@@ -66,6 +66,7 @@ export default function Agentes() {
               <tr>
                 <th className="th">Nombre</th>
                 <th className="th">Email</th>
+                <th className="th">CUR</th>
                 <th className="th">Rol</th>
                 <th className="th">Estado</th>
                 <th className="th">Desde</th>
@@ -77,6 +78,7 @@ export default function Agentes() {
                 <tr key={a.id} className="hover:bg-gray-50">
                   <td className="td font-medium">{a.nombre}</td>
                   <td className="td text-gray-500">{a.email}</td>
+                  <td className="td text-gray-500 font-mono text-xs">{a.cur || '—'}</td>
                   <td className="td">
                     <span className={`badge ${a.rol === 'SUPERADMIN' ? 'badge-purple' : 'badge-blue'}`}>{a.rol}</span>
                   </td>
@@ -109,6 +111,11 @@ export default function Agentes() {
           <div>
             <label className="label">{editing ? 'Nueva contraseña (dejar vacío para no cambiar)' : 'Contraseña *'}</label>
             <input type="password" className="input" value={form.password||''} onChange={e=>set('password',e.target.value)}/>
+          </div>
+          <div>
+            <label className="label">CUR (Código Único de Registro)</label>
+            <input className="input font-mono" placeholder="Ej: 12345-RUBF" value={form.cur||''} onChange={e=>set('cur',e.target.value)}/>
+            <p className="text-xs text-gray-400 mt-1">Código asignado al agente residente por el RUBF. Se usará en reportes de beneficiarios finales.</p>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div><label className="label">Rol</label>

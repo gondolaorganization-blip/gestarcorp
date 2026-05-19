@@ -28,7 +28,7 @@ export function estadoBadge(estado) {
     SUSPENDIDA: 'badge-yellow', ACTIVO: 'badge-green', INACTIVO: 'badge-gray',
     PAGADO: 'badge-green', VENCIDO: 'badge-red', PENDIENTE: 'badge-yellow', EXENTO: 'badge-gray',
     ABIERTA: 'badge-yellow', EN_PROCESO: 'badge-blue', RESUELTA: 'badge-green', CERRADA: 'badge-gray',
-    MENSUAL: 'badge-blue', ANUAL: 'badge-purple', FUNDADOR: 'badge-purple',
+    TRIAL: 'badge-amber', MENSUAL: 'badge-blue', ANUAL: 'badge-purple', FUNDADOR: 'badge-purple',
   };
   return map[estado] || 'badge-gray';
 }

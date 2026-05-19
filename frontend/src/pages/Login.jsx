@@ -32,7 +32,7 @@ export default function Login() {
           <div className="h-14 w-14 bg-brand-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <span className="text-white font-black text-xl">GG</span>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">GESTARGOV</h1>
+          <h1 className="text-2xl font-bold text-gray-900">GESTARCORP</h1>
           <p className="text-sm text-gray-500 mt-1">Panel del Agente Residente</p>
         </div>
 

@@ -73,6 +73,7 @@ export async function obtenerSociedad(req, res) {
         orderBy: [{ anio: 'desc' }, { tipo: 'asc' }],
         take: 20,
       },
+      agente: { select: { id: true, nombre: true, email: true, cur: true } },
       _count: { select: { actas: true, acciones: true, documentos: true, consultas: true } }
     }
   });
@@ -100,8 +101,10 @@ export async function crearSociedad(req, res) {
       cantidadAcciones:  d.cantidadAcciones ? Number(d.cantidadAcciones) : null,
       valorNominal:      d.valorNominal  ? Number(d.valorNominal)    : null,
       estado:            d.estado     || 'ACTIVA',
-      planCliente:       d.planCliente || 'MENSUAL',
-      fechaVencimiento:  d.fechaVencimiento  ? new Date(d.fechaVencimiento)  : null,
+      planCliente:       d.planCliente || 'TRIAL',
+      fechaVencimiento:  d.fechaVencimiento
+        ? new Date(d.fechaVencimiento)
+        : new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 días de prueba
       notas:             d.notas || null,
       agenteId:          req.user.id,
     }
@@ -142,7 +145,21 @@ export async function actualizarSociedad(req, res) {
       ...(d.fechaVencimiento !== undefined && {
         fechaVencimiento: d.fechaVencimiento ? new Date(d.fechaVencimiento) : null
       }),
-      ...(d.notas !== undefined && { notas: d.notas || null }),
+      ...(d.notas        !== undefined && { notas:        d.notas        || null }),
+      ...(d.email        !== undefined && { email:        d.email        || null }),
+      ...(d.telefono     !== undefined && { telefono:     d.telefono     || null }),
+      ...(d.jurisdiccion !== undefined && { jurisdiccion: d.jurisdiccion || null }),
+      // RUBF fields
+      ...(d.tipoPersonaJuridica !== undefined && { tipoPersonaJuridica: d.tipoPersonaJuridica || null }),
+      ...(d.ruc !== undefined && { ruc: d.ruc || null }),
+      ...(d.actividadPrincipal !== undefined && { actividadPrincipal: d.actividadPrincipal || null }),
+      ...(d.estadoRegistroPublico !== undefined && { estadoRegistroPublico: d.estadoRegistroPublico || null }),
+      ...(d.fechaRegistroRUBF !== undefined && {
+        fechaRegistroRUBF: d.fechaRegistroRUBF ? new Date(d.fechaRegistroRUBF) : null
+      }),
+      ...(d.servicioAccionistaNominal !== undefined && { servicioAccionistaNominal: Boolean(d.servicioAccionistaNominal) }),
+      ...(d.servicioDirectorNominal !== undefined && { servicioDirectorNominal: Boolean(d.servicioDirectorNominal) }),
+      ...(d.servicioApoderado !== undefined && { servicioApoderado: Boolean(d.servicioApoderado) }),
     }
   });
   res.json(sociedad);
@@ -161,7 +178,8 @@ export async function resumenSociedad(req, res) {
       include: {
         _count: {
           select: { accionistas: true, directores: true, actas: true, acciones: true }
-        }
+        },
+        agente: { select: { id: true, nombre: true, email: true, cur: true } },
       }
     }),
     prisma.consulta.count({
@@ -208,10 +226,14 @@ export async function crearDirector(req, res) {
       nombre:            d.nombre.trim(),
       tipoDocumento:     d.tipoDocumento,
       numeroDocumento:   d.numeroDocumento.trim(),
-      nacionalidad:      d.nacionalidad || null,
-      email:             d.email        || null,
-      telefono:          d.telefono     || null,
-      domicilio:         d.domicilio    || null,
+      nacionalidad:      d.nacionalidad      || null,
+      profesion:         d.profesion         || null,
+      rucNT:             d.rucNT             || null,
+      email:             d.email             || null,
+      telefono:          d.telefono          || null,
+      domicilio:         d.domicilio         || null,
+      jurisdiccion:      d.jurisdiccion      || null,
+      esNominal:         Boolean(d.esNominal),
       cargo:             d.cargo,
       fechaNombramiento: d.fechaNombramiento ? new Date(d.fechaNombramiento) : null,
       fechaVencimiento:  d.fechaVencimiento  ? new Date(d.fechaVencimiento)  : null,
@@ -230,17 +252,21 @@ export async function actualizarDirector(req, res) {
       ...(d.nombre            && { nombre:          d.nombre.trim() }),
       ...(d.tipoDocumento     && { tipoDocumento:    d.tipoDocumento }),
       ...(d.numeroDocumento   && { numeroDocumento:  d.numeroDocumento.trim() }),
-      ...(d.nacionalidad !== undefined && { nacionalidad: d.nacionalidad || null }),
-      ...(d.email        !== undefined && { email:        d.email        || null }),
-      ...(d.telefono     !== undefined && { telefono:     d.telefono     || null }),
-      ...(d.domicilio    !== undefined && { domicilio:    d.domicilio    || null }),
+      ...(d.nacionalidad  !== undefined && { nacionalidad:  d.nacionalidad  || null }),
+      ...(d.profesion     !== undefined && { profesion:     d.profesion     || null }),
+      ...(d.rucNT         !== undefined && { rucNT:         d.rucNT         || null }),
+      ...(d.email         !== undefined && { email:         d.email         || null }),
+      ...(d.telefono      !== undefined && { telefono:      d.telefono      || null }),
+      ...(d.domicilio     !== undefined && { domicilio:     d.domicilio     || null }),
+      ...(d.jurisdiccion  !== undefined && { jurisdiccion:  d.jurisdiccion  || null }),
       ...(d.cargo             && { cargo:            d.cargo }),
       ...(d.fechaNombramiento && { fechaNombramiento: new Date(d.fechaNombramiento) }),
       ...(d.fechaVencimiento !== undefined && {
         fechaVencimiento: d.fechaVencimiento ? new Date(d.fechaVencimiento) : null
       }),
-      ...(d.activo !== undefined && { activo: Boolean(d.activo) }),
-      ...(d.notas !== undefined  && { notas:  d.notas || null }),
+      ...(d.esNominal !== undefined && { esNominal: Boolean(d.esNominal) }),
+      ...(d.activo    !== undefined && { activo:    Boolean(d.activo) }),
+      ...(d.notas     !== undefined && { notas:     d.notas || null }),
     }
   });
   res.json(director);
@@ -287,9 +313,13 @@ export async function crearAccionista(req, res) {
       tipoDocumento:    d.tipoDocumento,
       numeroDocumento:  d.numeroDocumento.trim(),
       nacionalidad:     d.nacionalidad    || null,
+      profesion:        d.profesion       || null,
+      rucNT:            d.rucNT           || null,
       email:            d.email           || null,
       telefono:         d.telefono        || null,
       domicilio:        d.domicilio       || null,
+      jurisdiccion:     d.jurisdiccion    || null,
+      esNominal:        Boolean(d.esNominal),
       cantidadAcciones: d.cantidadAcciones ? Number(d.cantidadAcciones) : 0,
       porcentaje:       d.porcentaje       ? Number(d.porcentaje)       : null,
       fechaIngreso:     d.fechaIngreso     ? new Date(d.fechaIngreso)   : null,
@@ -315,10 +345,14 @@ export async function actualizarAccionista(req, res) {
       ...(d.nombre            && { nombre:          d.nombre.trim() }),
       ...(d.tipoDocumento     && { tipoDocumento:    d.tipoDocumento }),
       ...(d.numeroDocumento   && { numeroDocumento:  d.numeroDocumento.trim() }),
-      ...(d.nacionalidad !== undefined && { nacionalidad: d.nacionalidad || null }),
-      ...(d.email        !== undefined && { email:        d.email        || null }),
-      ...(d.telefono     !== undefined && { telefono:     d.telefono     || null }),
-      ...(d.domicilio    !== undefined && { domicilio:    d.domicilio    || null }),
+      ...(d.nacionalidad  !== undefined && { nacionalidad:  d.nacionalidad  || null }),
+      ...(d.profesion     !== undefined && { profesion:     d.profesion     || null }),
+      ...(d.rucNT         !== undefined && { rucNT:         d.rucNT         || null }),
+      ...(d.email         !== undefined && { email:         d.email         || null }),
+      ...(d.telefono      !== undefined && { telefono:      d.telefono      || null }),
+      ...(d.domicilio     !== undefined && { domicilio:     d.domicilio     || null }),
+      ...(d.jurisdiccion  !== undefined && { jurisdiccion:  d.jurisdiccion  || null }),
+      ...(d.esNominal !== undefined && { esNominal: Boolean(d.esNominal) }),
       ...(d.cantidadAcciones !== undefined && {
         cantidadAcciones: Number(d.cantidadAcciones) || 0
       }),

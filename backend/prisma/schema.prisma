@@ -16,11 +16,20 @@ model Usuario {
   nombre       String
   rol          RolUsuario @default(AGENTE)
   activo       Boolean  @default(true)
+  cur          String?
   creadoEn     DateTime @default(now())
   actualizadoEn DateTime @updatedAt
 
   consultas    Consulta[]
   sociedades   Sociedad[]  @relation("AgenteResidente")
+  evaluaciones EvaluacionRiesgo[]
+  eventosRegistrados         EventoCorporativo[]
+  capacitaciones             CapacitacionAgente[]
+  manualesPrevencion         ManualPrevencion[]
+  evaluacionesIndependientes EvaluacionIndependiente[]
+  declaracionesJuradas       DeclaracionJuradaAnual[]
+  listasSanciones            ListaSanciones[]
+  sesionesScreening          SesionScreening[]
 
   @@map("usuarios")
 }
@@ -47,6 +56,30 @@ model Sociedad {
   valorNominal       Decimal?      @db.Decimal(15, 2)
   estado             EstadoSociedad @default(ACTIVA)
   planCliente        PlanCliente   @default(MENSUAL)
+
+  // ── Contacto y operación ────────────────────────────────────────────────
+  email              String?
+  telefono           String?
+  jurisdiccion       String?
+
+  // ── Datos RUBF ───────────────────────────────────────────────────────────
+  tipoPersonaJuridica      TipoPersonaJuridica? @default(SOCIEDAD_ANONIMA)
+  ruc                      String?
+  actividadPrincipal       String?
+  estadoRegistroPublico    String?
+  fechaRegistroRUBF        DateTime?
+  servicioAccionistaNominal Boolean @default(false)
+  servicioDirectorNominal   Boolean @default(false)
+  servicioApoderado         Boolean @default(false)
+
+  // ── Riesgo BC/FT ─────────────────────────────────────────────────────────
+  nivelRiesgo              NivelRiesgo? @default(BAJO)
+  proximaRevisionRiesgo    DateTime?
+
+  // ── Flujos corporativos ────────────────────────────────────────────────────
+  fechaDisolucion          DateTime?
+  fechaVencimientoRetension DateTime?   // Disolución + 5 años (Ley 254-2021)
+
   fechaVencimiento   DateTime?
   notas              String?
   creadoEn           DateTime      @default(now())
@@ -57,6 +90,12 @@ model Sociedad {
 
   accionistas        Accionista[]
   directores         Director[]
+  apoderados         Apoderado[]
+  docsDiligencia     DocumentoDiligencia[]
+  evaluaciones       EvaluacionRiesgo[]
+  medidasMitigadoras MedidaMitigadora[]
+  eventosCorporativos EventoCorporativo[]
+  recordatorio       RecordatorioConfig?
   acciones           Accion[]
   actas              Acta[]
   beneficiarios      BeneficiarioFinal[]
@@ -77,7 +116,237 @@ enum EstadoSociedad {
   DISUELTA
 }
 
+enum NivelRiesgo {
+  BAJO
+  MEDIO
+  ALTO
+}
+
+// ─── EVALUACIONES DE RIESGO BC/FT ─────────────────────────────────────────────
+
+model EvaluacionRiesgo {
+  id               String      @id @default(uuid())
+  sociedadId       String
+  sociedad         Sociedad    @relation(fields: [sociedadId], references: [id], onDelete: Cascade)
+
+  nivelRiesgo      NivelRiesgo
+  justificacion    String
+  factoresRiesgo   String?     // JSON array de factores seleccionados
+
+  proximaRevision  DateTime
+  evaluadoPorId    String?
+  evaluadoPor      Usuario?    @relation(fields: [evaluadoPorId], references: [id])
+
+  creadoEn         DateTime    @default(now())
+
+  @@map("evaluaciones_riesgo")
+}
+
+// ─── MEDIDAS MITIGADORAS (Servicios nominales — Guía JD-02-2022 Art. 19-21) ───
+
+model MedidaMitigadora {
+  id               String          @id @default(uuid())
+  sociedadId       String
+  sociedad         Sociedad        @relation(fields: [sociedadId], references: [id], onDelete: Cascade)
+
+  tipo             TipoMedida
+  entidadTipo      EntidadNominal
+  entidadId        String?
+  entidadNombre    String
+
+  fechaEmision     DateTime?
+  fechaVencimiento DateTime?
+  capacitacionHoras Int?            // Para DECLARACION_JURADA — debe ser ≥ 8
+
+  estado           EstadoMedida    @default(VIGENTE)
+  archivo          String?
+  nombreArchivo    String?
+  notas            String?
+  creadoEn         DateTime        @default(now())
+  actualizadoEn    DateTime        @updatedAt
+
+  @@map("medidas_mitigadoras")
+}
+
+enum TipoMedida {
+  CONTRATO_BF                 // Contrato/acuerdo que identifica al BF
+  DECLARACION_JURADA_NOMINAL  // Declaración jurada del nominal (≥8h capacitación)
+  SEGUIMIENTO_ANUAL           // Verificación anual de la relación nominal
+  OTRO
+}
+
+enum EntidadNominal {
+  DIRECTOR
+  ACCIONISTA
+  APODERADO
+  SOCIEDAD
+}
+
+enum EstadoMedida {
+  VIGENTE
+  VENCIDO
+  PENDIENTE
+}
+
+// ─── EVENTOS CORPORATIVOS (Cambio de agente, Disolución) ──────────────────────
+
+model EventoCorporativo {
+  id               String                @id @default(uuid())
+  sociedadId       String
+  sociedad         Sociedad              @relation(fields: [sociedadId], references: [id], onDelete: Cascade)
+
+  tipo             TipoEventoCorporativo
+  estado           EstadoEvento          @default(PENDIENTE)
+  fecha            DateTime
+  descripcion      String?
+
+  // Cambio de agente
+  agenteAnteriorNombre String?
+  agenteNuevoNombre    String?
+  agenteNuevoId        String?
+  documentosEntregados String?            // JSON array de documentos
+
+  // Disolución
+  motivoDisolucion     String?
+  fechaVencimientoRetension DateTime?
+
+  // Archivo acta / constancia
+  archivo          String?
+  nombreArchivo    String?
+
+  notas            String?
+  registradoPorId  String?
+  registradoPor    Usuario?              @relation(fields: [registradoPorId], references: [id])
+
+  creadoEn         DateTime              @default(now())
+  actualizadoEn    DateTime              @updatedAt
+
+  @@map("eventos_corporativos")
+}
+
+enum TipoEventoCorporativo {
+  CAMBIO_AGENTE
+  DISOLUCION
+  LIQUIDACION
+  FUSION
+  ESCISION
+  OTRO
+}
+
+enum EstadoEvento {
+  PENDIENTE
+  COMPLETADO
+  CANCELADO
+}
+
+// ─── CUMPLIMIENTO DEL AGENTE (Guía JD-02-2022 arts. 22-27) ────────────────────
+
+model CapacitacionAgente {
+  id            String           @id @default(uuid())
+  agenteId      String
+  agente        Usuario          @relation(fields: [agenteId], references: [id], onDelete: Cascade)
+
+  fecha         DateTime
+  horas         Int
+  temas         String
+  proveedor     String?
+  tipo          TipoCapacitacion @default(EXTERNA)
+  participantes String?
+  archivo       String?
+  nombreArchivo String?
+  notas         String?
+  creadoEn      DateTime         @default(now())
+
+  @@map("capacitaciones_agente")
+}
+
+enum TipoCapacitacion {
+  INTERNA
+  EXTERNA
+  VIRTUAL
+  PRESENCIAL
+}
+
+model ManualPrevencion {
+  id                   String       @id @default(uuid())
+  agenteId             String
+  agente               Usuario      @relation(fields: [agenteId], references: [id], onDelete: Cascade)
+
+  version              String
+  fechaAprobacion      DateTime
+  fechaProximaRevision DateTime?
+  estado               EstadoManual @default(VIGENTE)
+  archivo              String?
+  nombreArchivo        String?
+  notas                String?
+  creadoEn             DateTime     @default(now())
+
+  @@map("manuales_prevencion")
+}
+
+enum EstadoManual {
+  VIGENTE
+  DESACTUALIZADO
+  EN_REVISION
+}
+
+model EvaluacionIndependiente {
+  id              String              @id @default(uuid())
+  agenteId        String
+  agente          Usuario             @relation(fields: [agenteId], references: [id], onDelete: Cascade)
+
+  anio            Int
+  evaluador       String
+  fechaEvaluacion DateTime
+  hallazgos       String?
+  resultado       ResultadoEvaluacion @default(SATISFACTORIO)
+  archivo         String?
+  nombreArchivo   String?
+  notas           String?
+  creadoEn        DateTime            @default(now())
+
+  @@map("evaluaciones_independientes")
+}
+
+enum ResultadoEvaluacion {
+  SATISFACTORIO
+  CONDICIONADO
+  INSATISFACTORIO
+}
+
+model DeclaracionJuradaAnual {
+  id                String            @id @default(uuid())
+  agenteId          String
+  agente            Usuario           @relation(fields: [agenteId], references: [id], onDelete: Cascade)
+
+  anio              Int
+  fechaPresentacion DateTime
+  autoridad         String?
+  estado            EstadoDeclaracion @default(PRESENTADA)
+  comprobante       String?
+  nombreComprobante String?
+  notas             String?
+  creadoEn          DateTime          @default(now())
+
+  @@unique([agenteId, anio])
+  @@map("declaraciones_juradas_anuales")
+}
+
+enum EstadoDeclaracion {
+  PRESENTADA
+  CONFIRMADA
+  PENDIENTE
+}
+
+enum TipoPersonaJuridica {
+  SOCIEDAD_ANONIMA
+  FUNDACION_INTERES_PRIVADO
+  SOCIEDAD_RESPONSABILIDAD_LIMITADA
+  SOCIEDAD_EXTRANJERA
+}
+
 enum PlanCliente {
+  TRIAL
   MENSUAL
   ANUAL
   FUNDADOR
@@ -100,9 +369,13 @@ model Accionista {
   tipoDocumento    TipoDocumento
   numeroDocumento  String
   nacionalidad     String?
+  profesion        String?
+  rucNT            String?
   email            String?
   telefono         String?
   domicilio        String?
+  jurisdiccion     String?
+  esNominal        Boolean       @default(false)
   cantidadAcciones Int           @default(0)
   porcentaje       Decimal?      @db.Decimal(5, 2)
   fechaIngreso     DateTime?
@@ -155,9 +428,13 @@ model Director {
   tipoDocumento    TipoDocumento
   numeroDocumento  String
   nacionalidad     String?
+  profesion        String?
+  rucNT            String?
   email            String?
   telefono         String?
   domicilio        String?
+  jurisdiccion     String?
+  esNominal        Boolean      @default(false)
   cargo            CargoDirector
   fechaNombramiento DateTime?
   fechaVencimiento  DateTime?
@@ -283,35 +560,166 @@ enum EstadoActa {
 // ─── BENEFICIARIOS FINALES (Ley 52 de 2016) ──────────────────────────────────
 
 model BeneficiarioFinal {
-  id                  String        @id @default(uuid())
+  id                  String             @id @default(uuid())
   sociedadId          String
-  sociedad            Sociedad      @relation(fields: [sociedadId], references: [id], onDelete: Cascade)
+  sociedad            Sociedad           @relation(fields: [sociedadId], references: [id], onDelete: Cascade)
 
+  // Tipo de beneficiario (determina qué campos aplican)
+  tipoBeneficiario    TipoBeneficiario   @default(PERSONA_NATURAL)
+
+  // Campo display unificado (calculado al guardar)
   nombre              String
-  tipoDocumento       TipoDocumento
-  numeroDocumento     String
+
+  // ── Persona Natural ──────────────────────────────────────────────────────
+  primerNombre        String?
+  segundoNombre       String?
+  primerApellido      String?
+  segundoApellido     String?
+  tipoDocumento       TipoDocumento?
+  numeroDocumento     String?
   nacionalidad        String?
   fechaNacimiento     DateTime?
+  lugarNacimiento     String?
+  profesion           String?
+  actividadDeclarada  String?
+  rucNT               String?
+  jurisdiccion        String?
   domicilio           String?
-  porcentajeControl   Decimal?      @db.Decimal(5, 2)
-  tipoControl         TipoControl   @default(DIRECTO)
-  esPEP               Boolean       @default(false)
+  esPEP               Boolean            @default(false)
   cargoPublico        String?
+
+  // ── PJ que cotiza en Bolsa ───────────────────────────────────────────────
+  paisConstitucion    String?
+  nombreBolsa         String?
+  jurisdiccionBolsa   String?
+
+  // ── Estado ───────────────────────────────────────────────────────────────
+  fechaConstitucionEstado DateTime?
+
+  // ── Compartido: PJ Bolsa / Estado / Multilateral ─────────────────────────
+  representanteLegal  String?
+  personaContacto     String?
+  paisSede            String?
+
+  // ── Contacto (todos los tipos) ───────────────────────────────────────────
+  email               String?
+  telefonoPrefijo     String?            @default("+507")
+  telefono            String?
+
+  // ── Control y condición ───────────────────────────────────────────────────
+  porcentajeControl   Decimal?           @db.Decimal(5, 2)
+  tipoControl         TipoControl        @default(DIRECTO)
+  motivoCondicion     String?
   fechaDeclaracion    DateTime?
+
+  // ── Gestión interna ───────────────────────────────────────────────────────
   fechaActualizacion  DateTime?
   documentoIdentidad  String?
-  verificado          Boolean       @default(false)
+  verificado          Boolean            @default(false)
   notas               String?
-  creadoEn            DateTime      @default(now())
-  actualizadoEn       DateTime      @updatedAt
+  creadoEn            DateTime           @default(now())
+  actualizadoEn       DateTime           @updatedAt
 
   @@map("beneficiarios_finales")
+}
+
+enum TipoBeneficiario {
+  PERSONA_NATURAL
+  PERSONA_JURIDICA_BOLSA
+  ESTADO
+  ENTIDAD_ESTATAL_MULTILATERAL
 }
 
 enum TipoControl {
   DIRECTO
   INDIRECTO
   DIRECTO_E_INDIRECTO
+}
+
+// ─── APODERADOS ───────────────────────────────────────────────────────────────
+
+model Apoderado {
+  id               String        @id @default(uuid())
+  sociedadId       String
+  sociedad         Sociedad      @relation(fields: [sociedadId], references: [id], onDelete: Cascade)
+
+  // Datos personales (debida diligencia — Guía JD-02-2022 Art. 6 y 7)
+  nombre           String
+  tipoDocumento    TipoDocumento
+  numeroDocumento  String
+  nacionalidad     String?
+  profesion        String?
+  rucNT            String?
+  email            String?
+  telefono         String?
+  domicilio        String?
+  jurisdiccion     String?
+
+  // Datos del poder
+  tipoPoder        TipoPoder     @default(GENERAL)
+  facultades       String?
+  fechaOtorgamiento DateTime?
+  fechaVencimiento  DateTime?
+  notaria          String?
+  tomoEscritura    String?
+  folioEscritura   String?
+
+  activo           Boolean       @default(true)
+  notas            String?
+  creadoEn         DateTime      @default(now())
+  actualizadoEn    DateTime      @updatedAt
+
+  @@map("apoderados")
+}
+
+// ─── DOCUMENTOS DE DEBIDA DILIGENCIA ─────────────────────────────────────────
+
+model DocumentoDiligencia {
+  id            String              @id @default(uuid())
+  sociedadId    String
+  sociedad      Sociedad            @relation(fields: [sociedadId], references: [id], onDelete: Cascade)
+
+  tipo          TipoDocDiligencia
+  entidadTipo   EntidadDiligencia
+  entidadId     String?
+  entidadNombre String
+
+  archivo       String
+  nombreArchivo String
+  tamanio       Int?
+
+  estado        EstadoDocDiligencia @default(RECIBIDO)
+  fechaVencimiento DateTime?
+  notas         String?
+  creadoEn      DateTime            @default(now())
+  actualizadoEn DateTime            @updatedAt
+
+  @@map("documentos_diligencia")
+}
+
+enum TipoDocDiligencia {
+  CEDULA_PASAPORTE
+  COMPROBANTE_DOMICILIO
+  REFERENCIA_BANCARIA
+  CERTIFICADO_REGISTRO_PUBLICO
+  CERTIFICADO_DGI
+  LICENCIA_COMERCIAL
+  CERTIFICADO_ACCIONES
+  ESCRITURA_PODER
+  OTRO
+}
+
+enum EntidadDiligencia {
+  SOCIEDAD
+  DIRECTOR
+  ACCIONISTA
+  APODERADO
+  BENEFICIARIO
+}
+
+enum EstadoDocDiligencia {
+  RECIBIDO
+  VENCIDO
 }
 
 // ─── PACTO SOCIAL ─────────────────────────────────────────────────────────────
@@ -529,6 +937,9 @@ model Suscripcion {
   // Yappy
   yappyOrderId         String?
 
+  // PayPal
+  paypalOrderId        String?
+
   renovacionAutomatica Boolean           @default(false)
   notas                String?
   creadoEn             DateTime          @default(now())
@@ -576,8 +987,129 @@ enum EstadoPago {
 enum MetodoPago {
   STRIPE
   YAPPY
+  PAYPAL
   TRANSFERENCIA
   EFECTIVO
+}
+
+// ─── PLANTILLAS DE DOCUMENTOS ────────────────────────────────────────────────
+
+model Plantilla {
+  id          String   @id @default(uuid())
+  nombre      String
+  descripcion String?
+  contenido   String
+  activo      Boolean  @default(true)
+  creadoEn    DateTime @default(now())
+  actualizadoEn DateTime @updatedAt
+
+  @@map("plantillas")
+}
+
+// ─── RECORDATORIOS DE COMPLETITUD DE INFORMACIÓN ─────────────────────────────
+
+model RecordatorioConfig {
+  id         String   @id @default(uuid())
+  sociedadId String   @unique
+  sociedad   Sociedad @relation(fields: [sociedadId], references: [id], onDelete: Cascade)
+
+  activo            Boolean  @default(true)
+
+  // Frecuencias configurables en días para cada tier
+  // El email sale con la frecuencia del tier MÁS URGENTE que tenga pendientes
+  frecuenciaCritica Int      @default(7)
+  frecuenciaAlta    Int      @default(15)
+  frecuenciaMedia   Int      @default(30)
+  frecuenciaBaja    Int      @default(60)
+
+  // Un único registro de último envío — se usa la frecuencia del tier más urgente pendiente
+  ultimoEnvio       DateTime?
+
+  creadoEn          DateTime @default(now())
+  actualizadoEn     DateTime @updatedAt
+
+  @@map("recordatorios_config")
+}
+
+// ─── SCREENING DE SANCIONES INTERNACIONALES (ONU) ────────────────────────────
+
+model ListaSanciones {
+  id            String           @id @default(uuid())
+  agenteId      String
+  agente        Usuario          @relation(fields: [agenteId], references: [id], onDelete: Cascade)
+
+  version       String           // Ej: "UN-2024-01-15" o nombre libre
+  archivo       String           // Ruta en disco
+  nombreArchivo String
+  tamanio       Int?
+  totalEntradas Int              @default(0)
+  vigente       Boolean          @default(true)
+  creadoEn      DateTime         @default(now())
+
+  sesiones      SesionScreening[]
+
+  @@map("listas_sanciones")
+}
+
+model SesionScreening {
+  id               String          @id @default(uuid())
+  agenteId         String
+  agente           Usuario         @relation(fields: [agenteId], references: [id], onDelete: Cascade)
+
+  listaSancionesId String
+  listaSanciones   ListaSanciones  @relation(fields: [listaSancionesId], references: [id])
+
+  estado           EstadoScreening @default(EN_PROCESO)
+  totalSujetos     Int             @default(0)
+  totalSociedades  Int             @default(0)
+  coincidenciasAltas    Int        @default(0)
+  coincidenciasPosibles Int        @default(0)
+  progreso         Int             @default(0) // 0-100
+  error            String?
+  creadoEn         DateTime        @default(now())
+  completadoEn     DateTime?
+
+  resultados       ResultadoScreening[]
+
+  @@map("sesiones_screening")
+}
+
+model ResultadoScreening {
+  id                     String          @id @default(uuid())
+  sesionId               String
+  sesion                 SesionScreening @relation(fields: [sesionId], references: [id], onDelete: Cascade)
+
+  sociedadId             String?
+  sociedadNombre         String
+  tipoSujeto             TipoSujetoScreening
+  sujetoNombre           String
+  sujetoDocumento        String?
+  nivel                  NivelScreening  @default(NINGUNA)
+  coincidenciasDetectadas String?        // JSON array con detalles de matches
+  justificacionIA         String?        // Texto de Claude
+  revisado               Boolean         @default(false)
+  creadoEn               DateTime        @default(now())
+
+  @@map("resultados_screening")
+}
+
+enum EstadoScreening {
+  EN_PROCESO
+  COMPLETADO
+  ERROR
+}
+
+enum NivelScreening {
+  ALTA
+  POSIBLE
+  NINGUNA
+}
+
+enum TipoSujetoScreening {
+  DIRECTOR
+  ACCIONISTA
+  APODERADO
+  BENEFICIARIO
 }
 
 // ─── ENUMS COMPARTIDOS ────────────────────────────────────────────────────────

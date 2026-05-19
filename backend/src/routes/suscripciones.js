@@ -3,8 +3,9 @@ import express from 'express';
 import {
   stripeCheckout, stripeSuccess, stripeWebhook, stripePortal,
   yappyIniciar, yappyCallback, yappyWebhook,
+  paypalCrearOrden, paypalCapturar,
   registrarPagoManual,
-  obtenerSuscripcion, historialPagos, vencimientosProximos, cancelarSuscripcion,
+  obtenerSuscripcion, historialPagos, vencimientosProximos, listarTrials, cancelarSuscripcion,
 } from '../controllers/suscripcionesController.js';
 import { requireAuth, requireAgente } from '../middleware/auth.js';
 
@@ -29,14 +30,17 @@ suscripcionesRouter.get('/stripe/success',  stripeSuccess);
 // ─── Rutas autenticadas ───────────────────────────────────────────────────────
 suscripcionesRouter.use(requireAuth, requireAgente);
 
-// Vencimientos próximos (panel global del agente)
+// Vencimientos próximos y trials activos
 suscripcionesRouter.get('/vencimientos', vencimientosProximos);
+suscripcionesRouter.get('/trials',       listarTrials);
 
 // Checkout
 suscripcionesRouter.post('/stripe/checkout',  stripeCheckout);
 suscripcionesRouter.post('/stripe/portal',     stripePortal);
 suscripcionesRouter.post('/yappy/iniciar',     yappyIniciar);
-suscripcionesRouter.post('/manual',            registrarPagoManual);
+suscripcionesRouter.post('/paypal/crear-orden', paypalCrearOrden);
+suscripcionesRouter.post('/paypal/capturar',    paypalCapturar);
+suscripcionesRouter.post('/manual',             registrarPagoManual);
 
 // Por sociedad
 suscripcionesRouter.get('/:id',               obtenerSuscripcion);

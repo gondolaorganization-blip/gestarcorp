@@ -28,6 +28,11 @@
   .btn-sm {
     @apply px-3 py-1.5 text-xs;
   }
+  .input-sm {
+    @apply px-2 py-1 text-xs rounded-md border border-gray-300
+           focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent
+           placeholder-gray-400 disabled:bg-gray-50;
+  }
   .card {
     @apply bg-white rounded-xl border border-gray-200 shadow-sm;
   }
@@ -48,6 +53,7 @@
   .badge-blue   { @apply badge bg-blue-100 text-blue-800; }
   .badge-gray   { @apply badge bg-gray-100 text-gray-700; }
   .badge-purple { @apply badge bg-purple-100 text-purple-800; }
+  .badge-amber  { @apply badge bg-amber-100 text-amber-800; }
   .th { @apply px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider; }
   .td { @apply px-4 py-3 text-sm text-gray-700; }
 }

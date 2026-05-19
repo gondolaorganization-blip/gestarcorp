@@ -15,8 +15,12 @@ import {
   portalObtenerConsulta, portalCuotaConsultas,
 } from '../controllers/consultasController.js';
 import { portalListarObligaciones } from '../controllers/alertasController.js';
-import { uploadIdentidad, handleUpload } from '../middleware/upload.js';
+import { uploadIdentidad, uploadDiligencia, handleUpload } from '../middleware/upload.js';
 import { requirePortal } from '../middleware/auth.js';
+import { portalObtenerCompletitud } from '../controllers/completitudController.js';
+import {
+  completarDatosSociedad, completarDirector, completarAccionista, subirDocumentoPortal,
+} from '../controllers/portalCompletarController.js';
 
 export const portalRouter = Router();
 
@@ -47,3 +51,10 @@ portalRouter.get('/consultas/cuota',  portalCuotaConsultas);
 portalRouter.get('/consultas',        portalListarConsultas);
 portalRouter.post('/consultas',       portalCrearConsulta);
 portalRouter.get('/consultas/:cId',   portalObtenerConsulta);
+
+// Completitud — el cliente ve su estado y puede completar datos
+portalRouter.get('/completitud',                     portalObtenerCompletitud);
+portalRouter.put('/completar/sociedad',              completarDatosSociedad);
+portalRouter.put('/completar/directores/:id',        completarDirector);
+portalRouter.put('/completar/accionistas/:id',       completarAccionista);
+portalRouter.post('/completar/documentos',           handleUpload(uploadDiligencia), subirDocumentoPortal);

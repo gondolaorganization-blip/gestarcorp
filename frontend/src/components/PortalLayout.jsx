@@ -1,11 +1,12 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { usePortal } from '../context/PortalContext.jsx';
-import { Building2, FileText, MessageSquare, LogOut } from 'lucide-react';
+import { Building2, FileText, MessageSquare, LogOut, ClipboardCheck } from 'lucide-react';
 
 const NAV = [
   { to: '/portal/sociedad',     label: 'Mi Sociedad',      icon: Building2 },
   { to: '/portal/obligaciones', label: 'Mis Obligaciones', icon: FileText },
   { to: '/portal/consultas',    label: 'Consultas',        icon: MessageSquare },
+  { to: '/portal/completar',    label: 'Completar info',   icon: ClipboardCheck },
 ];
 
 export default function PortalLayout() {
@@ -20,7 +21,7 @@ export default function PortalLayout() {
             <span className="text-brand-700 font-black text-xs">GG</span>
           </div>
           <div>
-            <p className="font-bold text-sm">Portal Cliente — GESTARGOV</p>
+            <p className="font-bold text-sm">Portal Cliente — GESTARCORP</p>
             {portalUser?.nombreSociedad && (
               <p className="text-brand-200 text-xs">{portalUser.nombreSociedad}</p>
             )}
