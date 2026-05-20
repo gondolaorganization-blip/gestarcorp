@@ -61,22 +61,19 @@ export default function App() {
             </Route>
 
             {/* Panel agente */}
-            <Route path="/" element={
-              <RequireAuth><Layout /></RequireAuth>
-            }>
-              <Route index element={<Navigate to="/dashboard" replace />} />
-              <Route path="dashboard"          element={<Dashboard />} />
-              <Route path="sociedades"         element={<Sociedades />} />
-              <Route path="sociedades/:id"     element={<SociedadDetalle />} />
-              <Route path="consultas"          element={<Consultas />} />
-              <Route path="alertas"            element={<Alertas />} />
-              <Route path="reportes"           element={<Reportes />} />
-              <Route path="suscripciones"      element={<Suscripciones />} />
-              <Route path="portal-usuarios"    element={<UsuariosPortal />} />
-              <Route path="agentes"            element={<Agentes />} />
-              <Route path="plantillas"         element={<Plantillas />} />
-              <Route path="cumplimiento"       element={<Cumplimiento />} />
-              <Route path="screening"          element={<Screening />} />
+            <Route element={<RequireAuth><Layout /></RequireAuth>}>
+              <Route path="/dashboard"          element={<Dashboard />} />
+              <Route path="/sociedades"         element={<Sociedades />} />
+              <Route path="/sociedades/:id"     element={<SociedadDetalle />} />
+              <Route path="/consultas"          element={<Consultas />} />
+              <Route path="/alertas"            element={<Alertas />} />
+              <Route path="/reportes"           element={<Reportes />} />
+              <Route path="/suscripciones"      element={<Suscripciones />} />
+              <Route path="/portal-usuarios"    element={<UsuariosPortal />} />
+              <Route path="/agentes"            element={<Agentes />} />
+              <Route path="/plantillas"         element={<Plantillas />} />
+              <Route path="/cumplimiento"       element={<Cumplimiento />} />
+              <Route path="/screening"          element={<Screening />} />
             </Route>
 
             {/* Fallback */}
