@@ -61,7 +61,7 @@ const PLANS = [
 const FEATURES = [
   { icon: "🏢", title: "Gestión de Sociedades", desc: "Ficha completa de cada sociedad: directores, accionistas, capital, tomo y folio del Registro Público. Todo actualizado." },
   { icon: "⚠️", title: "Alertas de Vencimiento", desc: "Tasa Única, Aviso de Operación, Declaración de Renta y beneficiarios finales — alertas automáticas antes de cada vencimiento." },
-  { icon: "🔍", title: "Screening y KYC", desc: "Verificación contra listas OFAC, ONU y PEPs. Cumplimiento con la Ley 23 de Panamá y estándares GAFI sin salir del sistema." },
+  { icon: "🔍", title: "Screening y KYC", desc: "Verificación contra la Lista Consolidada de Sanciones de la ONU y notificaciones de la UAF de Panamá. Cumplimiento con la Ley 23 de Panamá y la Ley 254 de beneficiarios finales." },
   { icon: "🌐", title: "Portal del Cliente", desc: "Tus clientes acceden a sus sociedades, obligaciones y documentos en un portal seguro y profesional con tu marca." },
   { icon: "📋", title: "Cumplimiento y ARCO", desc: "Gestiona formularios de debida diligencia, ARCO, beneficiarios finales y toda la documentación regulatoria exigida." },
   { icon: "📄", title: "Plantillas de Documentos", desc: "Genera actas, resoluciones, poderes y cartas de renuncia desde plantillas preconfiguradas para el derecho societario panameño." },
@@ -76,10 +76,10 @@ const TESTIMONIALS = [
 const FAQS = [
   { q: "¿Está alineado con la regulación panameña?", a: "Sí. GestarCorp está diseñado conforme a la Ley 23 de 2015 (AML/CFT), Ley 254 (beneficiarios finales), y los requerimientos del Registro Público de Panamá. Incluye los formularios y plazos vigentes." },
   { q: "¿Cómo funciona el portal del cliente?", a: "Cada sociedad puede tener acceso portal independiente. El cliente entra con su email y contraseña y ve sus obligaciones, documentos y el estado de su sociedad en tiempo real." },
-  { q: "¿Puedo importar mis sociedades existentes?", a: "Sí. Ofrecemos importación desde Excel o CSV. Para el plan Enterprise el proceso es asistido sin costo adicional." },
-  { q: "¿El screening está conectado a listas internacionales?", a: "Sí. El módulo de screening verifica contra OFAC SDN, listas de la ONU, PEPs panameños e internacionales. Las listas se actualizan automáticamente." },
+  { q: "¿Puedo importar mis sociedades existentes?", a: "La importación masiva desde Excel o CSV está próximamente. Por ahora, el equipo de onboarding puede ayudarle a ingresar sus sociedades iniciales. Contáctenos para coordinar." },
+  { q: "¿El screening está conectado a listas internacionales?", a: "El módulo de screening verifica contra la Lista Consolidada de Sanciones de la ONU y las notificaciones de la UAF de Panamá. Las listas se cargan manualmente dentro del sistema. La integración con listas adicionales está en desarrollo." },
   { q: "¿Hay período de prueba?", a: "Sí. 14 días de acceso completo sin tarjeta de crédito. Al finalizar puedes elegir tu plan o contactarnos." },
-  { q: "¿Mis datos y los de mis clientes están seguros?", a: "Encriptación AES-256, backups automáticos diarios, acceso 2FA y auditoría completa de accesos. Cumplimos con la Ley 81 de Protección de Datos Personales de Panamá." },
+  { q: "¿Mis datos y los de mis clientes están seguros?", a: "Sí. Los datos se almacenan en infraestructura en la nube con encriptación AES-256 en reposo y backups diarios automáticos. La conexión siempre va por HTTPS cifrado." },
 ];
 
 export default function GestarCorpLanding() {
@@ -169,6 +169,9 @@ export default function GestarCorpLanding() {
           </span>
         </div>
         <div style={{ display: "flex", gap: 32, alignItems: "center" }}>
+          <a href="https://gestarsoft.com"
+            style={{ fontSize: 13, fontWeight: 600, color: scrolled ? "#10B981" : "rgba(16,185,129,0.85)", textDecoration: "none", transition: "color 0.15s" }}
+          >← GestarSoft</a>
           {["Funciones", "Precios", "FAQ"].map(item => (
             <a key={item} href={`#${item.toLowerCase()}`}
               style={{ fontSize: 14, fontWeight: 600, color: scrolled ? "#4B5563" : "rgba(255,255,255,0.75)", textDecoration: "none", transition: "color 0.15s" }}
@@ -229,7 +232,7 @@ export default function GestarCorpLanding() {
           </div>
 
           <div className="fade-up" style={{ marginTop: 48, display: "flex", gap: 40, justifyContent: "center", flexWrap: "wrap", animationDelay: "0.4s" }}>
-            {[["AML", "Integrado"], ["GAFI", "Cumplimiento"], ["OFAC", "Screening"], ["ARCO", "Formularios"]].map(([t, s]) => (
+            {[["AML", "Integrado"], ["GAFI", "Cumplimiento"], ["ONU", "Screening"], ["ARCO", "Formularios"]].map(([t, s]) => (
               <div key={t} style={{ textAlign: "center" }}>
                 <div style={{ fontSize: 20, fontWeight: 900, color: "#10B981", fontFamily: "'DM Mono', monospace" }}>{t}</div>
                 <div style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", fontWeight: 500, letterSpacing: "0.06em" }}>{s}</div>
@@ -328,7 +331,7 @@ export default function GestarCorpLanding() {
                 </div>
                 <div style={{ fontSize: 11, color: "#10B981", fontWeight: 700, marginBottom: 10, textAlign: "center" }}>✓ 14 días gratis · Sin tarjeta</div>
                 <button
-                  onClick={() => navigate("/login")}
+                  onClick={() => navigate(`/registro?plan=${plan.id}`)}
                   style={{
                     width: "100%", marginBottom: 20, padding: "12px", fontSize: 13, fontWeight: 700,
                     borderRadius: 10, border: plan.popular ? "none" : "1px solid rgba(255,255,255,0.15)",
@@ -355,6 +358,35 @@ export default function GestarCorpLanding() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* PAYMENT METHODS */}
+      <section style={{ padding: "60px 48px 80px", background: "#0A1628", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+        <div style={{ maxWidth: 700, margin: "0 auto", textAlign: "center" }}>
+          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 24 }}>Métodos de pago aceptados</p>
+          <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
+            <div style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, padding: "16px 28px", textAlign: "center" }}>
+              <div style={{ fontSize: 22, marginBottom: 4 }}>🅿</div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "#fff" }}>PayPal</div>
+              <div style={{ fontSize: 11, color: "#10B981", fontWeight: 600 }}>Principal</div>
+            </div>
+            <div style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, padding: "16px 28px", textAlign: "center" }}>
+              <div style={{ fontSize: 22, marginBottom: 4 }}>📱</div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "rgba(255,255,255,0.7)" }}>Yappy</div>
+              <div style={{ fontSize: 11, color: "rgba(255,255,255,0.35)" }}>Contáctenos</div>
+            </div>
+            <div style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, padding: "16px 28px", textAlign: "center" }}>
+              <div style={{ fontSize: 22, marginBottom: 4 }}>🏦</div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "rgba(255,255,255,0.7)" }}>ACH / Transferencia</div>
+              <div style={{ fontSize: 11, color: "rgba(255,255,255,0.35)" }}>Contáctenos</div>
+            </div>
+          </div>
+          <p style={{ fontSize: 12, color: "rgba(255,255,255,0.25)", marginTop: 20 }}>
+            Para Yappy y transferencia bancaria, escríbanos a{" "}
+            <a href={`https://wa.me/50765143637?text=Hola, quiero suscribirme a GestarCorp`} target="_blank" rel="noreferrer" style={{ color: "rgba(255,255,255,0.45)", textDecoration: "underline" }}>WhatsApp</a>{" "}
+            y habilitamos el acceso manualmente.
+          </p>
         </div>
       </section>
 
@@ -423,8 +455,11 @@ export default function GestarCorpLanding() {
           <div style={{ width: 30, height: 30, borderRadius: 8, background: "linear-gradient(135deg, #0A1628, #10B981)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 900, color: "#fff" }}>G</div>
           <span style={{ fontSize: 14, fontWeight: 700, color: "rgba(255,255,255,0.6)" }}>Gestar Corp · GestarSoft</span>
         </div>
-        <div style={{ display: "flex", gap: 24 }}>
-          <a href="mailto:soporte@gestarsoft.com" style={{ fontSize: 12, color: "rgba(255,255,255,0.3)", textDecoration: "none" }}>Soporte</a>
+        <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
+          <a href="https://gestarsoft.com/terminos" target="_blank" rel="noreferrer" style={{ fontSize: 12, color: "rgba(255,255,255,0.3)", textDecoration: "none" }}>Términos</a>
+          <a href="https://gestarsoft.com/privacidad" target="_blank" rel="noreferrer" style={{ fontSize: 12, color: "rgba(255,255,255,0.3)", textDecoration: "none" }}>Privacidad</a>
+          <a href={`https://wa.me/50765143637?text=Hola, necesito soporte con GestarCorp`} target="_blank" rel="noreferrer" style={{ fontSize: 12, color: "rgba(255,255,255,0.3)", textDecoration: "none" }}>Soporte</a>
+          <a href="https://www.linkedin.com/company/gestarsoft" target="_blank" rel="noreferrer" style={{ fontSize: 12, color: "rgba(255,255,255,0.3)", textDecoration: "none" }}>LinkedIn</a>
           <a href="https://gestarsoft.com" style={{ fontSize: 12, color: "rgba(255,255,255,0.3)", textDecoration: "none" }}>GestarSoft.com</a>
         </div>
         <span style={{ fontSize: 12, color: "rgba(255,255,255,0.2)" }}>© 2026 GestarSoft · Panamá</span>
