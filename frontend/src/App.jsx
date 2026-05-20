@@ -7,6 +7,7 @@ import PortalLayout from './components/PortalLayout.jsx';
 
 import LandingPage       from './pages/LandingPage.jsx';
 import Login             from './pages/Login.jsx';
+import Registro          from './pages/Registro.jsx';
 import Dashboard         from './pages/Dashboard.jsx';
 import Sociedades        from './pages/Sociedades.jsx';
 import SociedadDetalle   from './pages/SociedadDetalle.jsx';
@@ -46,7 +47,8 @@ export default function App() {
             <Route path="/" element={<LandingPage />} />
 
             {/* Auth */}
-            <Route path="/login" element={<Login />} />
+            <Route path="/login"    element={<Login />} />
+            <Route path="/registro" element={<Registro />} />
 
             {/* Portal cliente */}
             <Route path="/portal/login" element={<PortalLogin />} />
