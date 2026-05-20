@@ -180,16 +180,22 @@ export default function GestarCorpLanding() {
         padding: "16px 48px", display: "flex", alignItems: "center", justifyContent: "space-between",
         transition: "all 0.25s ease",
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{ width: 36, height: 36, borderRadius: 10, background: "linear-gradient(135deg, #0A1628 0%, #10B981 100%)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 900, color: "#fff" }}>G</div>
-          <span style={{ fontSize: 18, fontWeight: 800, color: scrolled ? "#0A1628" : "#fff", letterSpacing: "-0.02em" }}>
-            Gestar <span style={{ color: "#10B981" }}>Corp</span>
-          </span>
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          <a href="https://gestarsoft.com" style={{
+            fontSize: 12, fontWeight: 600, color: scrolled ? "#6B7280" : "rgba(255,255,255,0.5)",
+            textDecoration: "none", transition: "color 0.15s",
+          }}
+            onMouseEnter={e => e.target.style.color = "#10B981"}
+            onMouseLeave={e => e.target.style.color = scrolled ? "#6B7280" : "rgba(255,255,255,0.5)"}
+          >← GestarSoft</a>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{ width: 36, height: 36, borderRadius: 10, background: "linear-gradient(135deg, #0A1628 0%, #10B981 100%)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 900, color: "#fff" }}>G</div>
+            <span style={{ fontSize: 18, fontWeight: 800, color: scrolled ? "#0A1628" : "#fff", letterSpacing: "-0.02em" }}>
+              Gestar <span style={{ color: "#10B981" }}>Corp</span>
+            </span>
+          </div>
         </div>
         <div className="lp-nav-links" style={{ display: "flex", gap: 32, alignItems: "center" }}>
-          <a href="https://gestarsoft.com"
-            style={{ fontSize: 13, fontWeight: 600, color: scrolled ? "#10B981" : "rgba(16,185,129,0.85)", textDecoration: "none", transition: "color 0.15s" }}
-          >← GestarSoft</a>
           {["Funciones", "Precios", "FAQ"].map(item => (
             <a key={item} href={`#${item.toLowerCase()}`}
               style={{ fontSize: 14, fontWeight: 600, color: scrolled ? "#4B5563" : "rgba(255,255,255,0.75)", textDecoration: "none", transition: "color 0.15s" }}
