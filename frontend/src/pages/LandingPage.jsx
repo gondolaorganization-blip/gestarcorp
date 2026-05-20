@@ -151,6 +151,24 @@ export default function GestarCorpLanding() {
         .toggle-track.on { background: var(--emerald); }
         .toggle-thumb { position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: left 0.2s; box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
         .toggle-track.on .toggle-thumb { left: 23px; }
+        /* ── Responsive ─────────────────────────────────────────── */
+        @media (max-width: 767px) {
+          nav { padding-left: 20px !important; padding-right: 20px !important; }
+          section { padding-left: 20px !important; padding-right: 20px !important; }
+          footer { padding-left: 20px !important; padding-right: 20px !important; flex-direction: column !important; align-items: flex-start !important; }
+          .lp-nav-links { display: none !important; }
+          .lp-nav-login { display: none !important; }
+          .lp-hero-btns { flex-direction: column !important; align-items: stretch !important; }
+          .lp-hero-btns button, .lp-hero-btns a { width: 100% !important; text-align: center !important; justify-content: center !important; }
+          .lp-grid-3, .lp-grid-4 { grid-template-columns: 1fr !important; }
+          .lp-grid-dash { grid-template-columns: repeat(2,1fr) !important; }
+          .lp-cta-h2 { font-size: clamp(26px, 7vw, 36px) !important; line-height: 1.15 !important; }
+          .lp-footer-links { gap: 14px !important; flex-wrap: wrap !important; }
+        }
+        @media (min-width: 768px) and (max-width: 1023px) {
+          .lp-grid-3, .lp-grid-4 { grid-template-columns: repeat(2,1fr) !important; }
+          .lp-grid-dash { grid-template-columns: repeat(2,1fr) !important; }
+        }
       `}</style>
 
       {/* NAVBAR */}
@@ -168,7 +186,7 @@ export default function GestarCorpLanding() {
             Gestar <span style={{ color: "#10B981" }}>Corp</span>
           </span>
         </div>
-        <div style={{ display: "flex", gap: 32, alignItems: "center" }}>
+        <div className="lp-nav-links" style={{ display: "flex", gap: 32, alignItems: "center" }}>
           <a href="https://gestarsoft.com"
             style={{ fontSize: 13, fontWeight: 600, color: scrolled ? "#10B981" : "rgba(16,185,129,0.85)", textDecoration: "none", transition: "color 0.15s" }}
           >← GestarSoft</a>
@@ -181,7 +199,7 @@ export default function GestarCorpLanding() {
           ))}
         </div>
         <div style={{ display: "flex", gap: 10 }}>
-          <button className="btn-ghost-dark" onClick={() => navigate("/login")}>Iniciar sesión</button>
+          <button className="btn-ghost-dark lp-nav-login" onClick={() => navigate("/login")}>Iniciar sesión</button>
           <button className="btn-emerald" style={{ padding: "9px 20px", fontSize: 13 }} onClick={scrollToPricing}>Empezar gratis</button>
         </div>
       </nav>
@@ -222,7 +240,7 @@ export default function GestarCorpLanding() {
             La plataforma para agentes residentes y firmas corporativas en Panamá. Gestión de sociedades, cumplimiento AML, portal cliente y alertas de vencimiento en un solo sistema.
           </p>
 
-          <div className="fade-up" style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap", animationDelay: "0.3s" }}>
+          <div className="fade-up lp-hero-btns" style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap", animationDelay: "0.3s" }}>
             <button className="btn-emerald" style={{ fontSize: 16, padding: "15px 36px" }} onClick={scrollToPricing}>
               Empezar 14 días gratis
             </button>
@@ -248,7 +266,7 @@ export default function GestarCorpLanding() {
                 <span style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", fontFamily: "'DM Mono', monospace" }}>corp.gestarsoft.com/dashboard</span>
               </div>
             </div>
-            <div style={{ padding: 20, display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 10 }}>
+            <div className="lp-grid-dash" style={{ padding: 20, display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 10 }}>
               {[
                 { l: "Sociedades", v: "142", c: "#10B981" },
                 { l: "Vencen 30 días", v: "8", c: "#F5A623" },
@@ -278,7 +296,7 @@ export default function GestarCorpLanding() {
             </h2>
             <p style={{ fontSize: 16, color: "#6B7280", maxWidth: 500, margin: "0 auto" }}>Diseñado conforme a la legislación societaria panameña y los estándares internacionales de cumplimiento.</p>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 16 }}>
+          <div className="lp-grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 16 }}>
             {FEATURES.map(f => (
               <div key={f.title} className="feature-card" style={{ background: "#ECEFF2", borderRadius: 14, padding: "28px 24px", border: "1px solid transparent" }}>
                 <div style={{ fontSize: 26, marginBottom: 14 }}>{f.icon}</div>
@@ -308,7 +326,7 @@ export default function GestarCorpLanding() {
             </div>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 20, alignItems: "start" }}>
+          <div className="lp-grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 20, alignItems: "start" }}>
             {PLANS.map(plan => (
               <div key={plan.id} className="plan-card" style={{
                 background: plan.popular ? "#fff" : "rgba(255,255,255,0.04)",
@@ -396,7 +414,7 @@ export default function GestarCorpLanding() {
           <div style={{ textAlign: "center", marginBottom: 56 }}>
             <h2 style={{ fontSize: 36, fontWeight: 900, color: "#0A1628", letterSpacing: "-0.025em" }}>Lo que dicen los agentes residentes</h2>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 20 }}>
+          <div className="lp-grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 20 }}>
             {TESTIMONIALS.map(t => (
               <div key={t.name} style={{ background: "#fff", borderRadius: 16, padding: 28, border: "1px solid #E5E7EB", boxShadow: "0 4px 20px rgba(0,0,0,0.05)" }}>
                 <div style={{ fontSize: 18, color: "#10B981", marginBottom: 12, letterSpacing: 2 }}>★★★★★</div>
@@ -438,7 +456,7 @@ export default function GestarCorpLanding() {
       <section style={{ padding: "100px 48px", background: "linear-gradient(135deg, #0A1628 0%, #0F2C4C 60%, #0A2018 100%)", textAlign: "center", position: "relative", overflow: "hidden" }}>
         <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", width: 600, height: 600, borderRadius: "50%", background: "radial-gradient(circle, rgba(16,185,129,0.07) 0%, transparent 70%)", filter: "blur(40px)" }} />
         <div style={{ position: "relative", zIndex: 1, maxWidth: 600, margin: "0 auto" }}>
-          <h2 style={{ fontSize: 44, fontWeight: 900, color: "#fff", letterSpacing: "-0.03em", marginBottom: 16 }}>Tu agencia corporativa, organizada</h2>
+          <h2 className="lp-cta-h2" style={{ fontSize: 44, fontWeight: 900, color: "#fff", letterSpacing: "-0.03em", marginBottom: 16 }}>Tu agencia corporativa, organizada</h2>
           <p style={{ fontSize: 16, color: "rgba(255,255,255,0.55)", marginBottom: 36, lineHeight: 1.7 }}>
             Únete a los agentes residentes que ya gestionan sus sociedades, cumplen con AML y brindan un portal moderno a sus clientes.
           </p>
@@ -455,7 +473,7 @@ export default function GestarCorpLanding() {
           <div style={{ width: 30, height: 30, borderRadius: 8, background: "linear-gradient(135deg, #0A1628, #10B981)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 900, color: "#fff" }}>G</div>
           <span style={{ fontSize: 14, fontWeight: 700, color: "rgba(255,255,255,0.6)" }}>Gestar Corp · GestarSoft</span>
         </div>
-        <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
+        <div className="lp-footer-links" style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
           <a href="https://gestarsoft.com/terminos" target="_blank" rel="noreferrer" style={{ fontSize: 12, color: "rgba(255,255,255,0.3)", textDecoration: "none" }}>Términos</a>
           <a href="https://gestarsoft.com/privacidad" target="_blank" rel="noreferrer" style={{ fontSize: 12, color: "rgba(255,255,255,0.3)", textDecoration: "none" }}>Privacidad</a>
           <a href={`https://wa.me/50765143637?text=Hola, necesito soporte con GestarCorp`} target="_blank" rel="noreferrer" style={{ fontSize: 12, color: "rgba(255,255,255,0.3)", textDecoration: "none" }}>Soporte</a>
