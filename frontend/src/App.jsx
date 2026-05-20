@@ -5,6 +5,7 @@ import { ToastProvider } from './components/Toast.jsx';
 import Layout from './components/Layout.jsx';
 import PortalLayout from './components/PortalLayout.jsx';
 
+import LandingPage       from './pages/LandingPage.jsx';
 import Login             from './pages/Login.jsx';
 import Dashboard         from './pages/Dashboard.jsx';
 import Sociedades        from './pages/Sociedades.jsx';
@@ -41,6 +42,9 @@ export default function App() {
       <PortalProvider>
         <ToastProvider>
           <Routes>
+            {/* Landing pública */}
+            <Route path="/" element={<LandingPage />} />
+
             {/* Auth */}
             <Route path="/login" element={<Login />} />
 
