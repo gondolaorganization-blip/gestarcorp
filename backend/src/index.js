@@ -29,8 +29,15 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 app.use(helmet());
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  'https://corp.gestarsoft.com',
+  'https://gestarcorp-frontend.onrender.com',
+  'http://localhost:5173',
+].filter(Boolean);
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: (origin, cb) => cb(null, !origin || allowedOrigins.includes(origin)),
   credentials: true,
 }));
 app.use(morgan('dev'));
