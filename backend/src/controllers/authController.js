@@ -3,7 +3,7 @@ import { signToken } from '../utils/tokens.js';
 import { hashPassword, verifyPassword, validarPassword } from '../utils/password.js';
 import { generarTokenReset } from '../utils/tokens.js';
 import { enviarEmailResetPortal, enviarBienvenidaPortal } from '../utils/email.js';
-import { addHours } from 'date-fns';
+import { addHours, addDays } from 'date-fns';
 
 // ─── AGENTE RESIDENTE ─────────────────────────────────────────────────────────
 
@@ -55,12 +55,31 @@ export async function setup(req, res) {
     data: { email: email.toLowerCase().trim(), passwordHash, nombre, rol: 'AGENTE' },
   });
 
+  await prisma.configuracion.upsert({
+    where: { id: 'singleton' },
+    update: {},
+    create: { id: 'singleton', trialVence: addDays(new Date(), 14), planActivo: false },
+  });
+
   const token = signToken({ id: usuario.id, email: usuario.email, rol: usuario.rol, nombre: usuario.nombre });
 
   res.status(201).json({
     token,
     usuario: { id: usuario.id, email: usuario.email, nombre: usuario.nombre, rol: usuario.rol },
   });
+}
+
+export async function activarPlan(req, res) {
+  const { secret } = req.body;
+  if (!secret || secret !== process.env.PLAN_ACTIVATION_SECRET) {
+    return res.status(403).json({ error: 'Secreto inválido.' });
+  }
+  await prisma.configuracion.upsert({
+    where: { id: 'singleton' },
+    update: { planActivo: true },
+    create: { id: 'singleton', planActivo: true },
+  });
+  res.json({ ok: true, mensaje: 'Plan activado correctamente.' });
 }
 
 export async function me(req, res) {

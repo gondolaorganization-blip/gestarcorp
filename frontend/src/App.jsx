@@ -21,6 +21,7 @@ import Agentes           from './pages/Agentes.jsx';
 import Plantillas        from './pages/Plantillas.jsx';
 import Cumplimiento      from './pages/Cumplimiento.jsx';
 import Screening        from './pages/Screening.jsx';
+import TrialVencidoPage  from './pages/TrialVencidoPage.jsx';
 import PortalLogin       from './pages/portal/PortalLogin.jsx';
 import PortalObligaciones from './pages/portal/PortalObligaciones.jsx';
 import PortalConsultas   from './pages/portal/PortalConsultas.jsx';
@@ -47,8 +48,9 @@ export default function App() {
             <Route path="/" element={<LandingPage />} />
 
             {/* Auth */}
-            <Route path="/login"    element={<Login />} />
-            <Route path="/registro" element={<Registro />} />
+            <Route path="/login"         element={<Login />} />
+            <Route path="/registro"      element={<Registro />} />
+            <Route path="/trial-vencido" element={<TrialVencidoPage />} />
 
             {/* Portal cliente */}
             <Route path="/portal/login" element={<PortalLogin />} />

@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import {
-  login, setup, me, cambiarPassword,
+  login, setup, me, cambiarPassword, activarPlan,
   loginPortal, mePortal, cambiarPasswordPortal,
   solicitarResetPortal, resetPasswordPortal,
   obtenerAccesoPortal, crearAccesoPortal, actualizarAccesoPortal,
@@ -21,6 +21,9 @@ const loginLimiter = rateLimit({
 
 // ─── SETUP INICIAL (solo cuando no existe ningún usuario) ────────────────────
 authRouter.post('/setup', setup);
+
+// ─── ACTIVAR PLAN (GestarSoft lo llama con secreto compartido) ───────────────
+authRouter.post('/activar-plan', activarPlan);
 
 // ─── AGENTE RESIDENTE ─────────────────────────────────────────────────────────
 authRouter.post('/login', loginLimiter, login);

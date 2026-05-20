@@ -16,6 +16,9 @@ api.interceptors.response.use(
       localStorage.removeItem('user');
       window.location.href = '/login';
     }
+    if (err.response?.status === 402) {
+      window.location.href = '/trial-vencido';
+    }
     return Promise.reject(err);
   }
 );
